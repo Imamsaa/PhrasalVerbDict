@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhrasalDict — Kamus Phrasal Verb Inggris–Indonesia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0f0f;
+    --paper: #f5f0e8;
+    --cream: #ede8dc;
+    --accent: #c8452a;
+    --accent2: #2a6c8e;
+    --gold: #c9a84c;
+    --muted: #7a7265;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* Decorative background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.03) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,0,0,0.02) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .display-font { font-family: 'Playfair Display', serif; }
+  .mono-font { font-family: 'DM Mono', monospace; }
+
+  /* Header */
+  .site-header {
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0px, var(--accent) 20px, var(--gold) 20px, var(--gold) 40px, var(--accent2) 40px, var(--accent2) 60px);
+  }
+  .header-deco {
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(80px, 18vw, 220px);
+    font-weight: 900;
+    font-style: italic;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    top: -10px;
+    right: -20px;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Search area */
+  .search-wrapper {
+    position: relative;
+  }
+  #search-input {
+    width: 100%;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    padding: 14px 52px 14px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+  }
+  #search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 4px 4px 0 var(--accent);
+  }
+  #search-input::placeholder { color: #b0a898; font-weight: 300; }
+  .search-clear {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 0.15s;
+    display: none;
+  }
+  .search-clear:hover { color: var(--accent); }
+  .search-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  /* Alphabet filter */
+  .alpha-btn {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    background: white;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+  }
+  .alpha-btn:hover {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+  .alpha-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .alpha-btn.all-btn {
+    width: auto;
+    padding: 0 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Stats bar */
+  .stats-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+  }
+
+  /* Entry cards */
+  .entry-card {
+    background: white;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    transition: all 0.18s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .entry-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--cream);
+    transition: background 0.18s;
+  }
+  .entry-card:hover {
+    border-color: var(--accent);
+    box-shadow: 4px 4px 0 rgba(200,69,42,0.15);
+    transform: translate(-1px, -1px);
+  }
+  .entry-card:hover::before { background: var(--accent); }
+  .entry-card.expanded {
+    border-color: var(--accent2);
+    box-shadow: 5px 5px 0 rgba(42,108,142,0.2);
+  }
+  .entry-card.expanded::before { background: var(--accent2); }
+
+  /* Keyword highlight */
+  .entry-keyword {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(16px, 3vw, 20px);
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .entry-keyword mark {
+    background: rgba(200,69,42,0.18);
+    color: var(--accent);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .entry-arti-short {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* Expanded detail */
+  .detail-panel {
+    display: none;
+    border-top: 1px dashed rgba(0,0,0,0.1);
+    margin-top: 10px;
+    padding-top: 12px;
+    animation: slideDown 0.22s ease;
+  }
+  .entry-card.expanded .detail-panel { display: block; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-meaning {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #3a3530;
+  }
+
+  .example-line {
+    font-style: italic;
+    color: var(--accent2);
+    font-size: 13.5px;
+  }
+
+  .tag-pill {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid currentColor;
+  }
+  .tag-phrasal { color: var(--accent); }
+  .tag-idiom { color: var(--gold); }
+
+  /* Letter divider */
+  .letter-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0 12px;
+  }
+  .letter-divider-char {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1;
+    min-width: 40px;
+  }
+  .letter-divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--ink), transparent);
+  }
+  .letter-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state-icon {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  /* Random word button */
+  .btn-random {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .btn-random:hover {
+    background: #a33620;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    transform: translate(-1px, -1px);
+  }
+  .btn-random:active { transform: translate(0,0); box-shadow: none; }
+
+  /* Footer */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px;
+    margin-top: 60px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Scroll to top */
+  #scrollTop {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    z-index: 50;
+    transition: all 0.15s;
+    box-shadow: 3px 3px 0 var(--accent);
+  }
+  #scrollTop:hover { background: var(--accent); box-shadow: 3px 3px 0 var(--ink); }
+  #scrollTop.visible { display: flex; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .alpha-btn { width: 26px; height: 26px; font-size: 11px; }
+    .alpha-btn.all-btn { padding: 0 8px; font-size: 10px; }
+    #search-input { font-size: 16px; padding: 12px 48px 12px 16px; }
+    .entry-keyword { font-size: 16px; }
+  }
+
+  /* Loading shimmer */
+  .shimmer {
+    background: linear-gradient(90deg, #f0ebe3 25%, #e8e3db 50%, #f0ebe3 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Word of the day banner */
+  .wotd-banner {
+    background: var(--ink);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .wotd-banner::before {
+    content: '"';
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: 200px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.04);
+    top: -40px;
+    left: -10px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  /* View toggle */
+  .view-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    background: white;
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .view-btn.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+
+  /* Grid mode */
+  #entries-container.grid-mode {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  #entries-container.grid-mode .letter-divider {
+    grid-column: 1 / -1;
+  }
+
+  /* Highlight animation for random word */
+  @keyframes flashCard {
+    0%   { box-shadow: 0 0 0 3px var(--accent); }
+    50%  { box-shadow: 0 0 0 8px rgba(200,69,42,0.3); }
+    100% { box-shadow: 4px 4px 0 rgba(42,108,142,0.2); }
+  }
+  .flash-highlight {
+    animation: flashCard 0.6s ease;
+  }
+
+  /* ===== TTS / SPEAKER BUTTON ===== */
+  .speak-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1.5px solid rgba(42,108,142,0.3);
+    background: rgba(42,108,142,0.06);
+    color: var(--accent2);
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .speak-btn:hover {
+    background: var(--accent2);
+    color: white;
+    border-color: var(--accent2);
+    box-shadow: 2px 2px 0 rgba(42,108,142,0.3);
+    transform: translate(-1px,-1px);
+  }
+  .speak-btn:active { transform: translate(0,0); box-shadow: none; }
+  .speak-btn.speaking {
+    background: var(--accent2);
+    color: white;
+    border-color: var(--accent2);
+    animation: speakPulse 0.8s ease-in-out infinite;
+  }
+  @keyframes speakPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(42,108,142,0.5); }
+    50%      { box-shadow: 0 0 0 5px rgba(42,108,142,0); }
+  }
+
+  /* Wave animation bars inside button while speaking */
+  .speak-btn .wave-bars {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+  }
+  .speak-btn.speaking .wave-bars { display: flex; }
+  .speak-btn.speaking .speaker-icon { display: none; }
+  .wave-bars span {
+    display: block;
+    width: 2.5px;
+    background: white;
+    border-radius: 2px;
+    animation: waveBar 0.6s ease-in-out infinite;
+  }
+  .wave-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .wave-bars span:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+  .wave-bars span:nth-child(3) { height: 8px; animation-delay: 0.2s; }
+  .wave-bars span:nth-child(4) { height: 12px; animation-delay: 0.05s; }
+  .wave-bars span:nth-child(5) { height: 5px; animation-delay: 0.15s; }
+  @keyframes waveBar {
+    0%,100% { transform: scaleY(0.5); }
+    50%      { transform: scaleY(1); }
+  }
+
+  /* TTS Settings Panel */
+  .tts-settings-bar {
+    background: white;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-top: none;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+  .tts-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .tts-select {
+    border: 1.5px solid rgba(0,0,0,0.15);
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    padding: 3px 8px;
+    cursor: pointer;
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.12s;
+  }
+  .tts-select:focus { border-color: var(--accent2); }
+  .tts-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent2) 0%, var(--accent2) 50%, #ddd 50%, #ddd 100%);
+    outline: none;
+    cursor: pointer;
+    border-radius: 2px;
+    width: 80px;
+  }
+  .tts-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent2);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .tts-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    font-weight: 500;
+    min-width: 28px;
+  }
+  .accent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    background: var(--paper);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.12s;
+    letter-spacing: 0.03em;
+  }
+  .accent-chip.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+  .accent-chip:hover:not(.active) { border-color: var(--ink); color: var(--ink); }
+
+  /* TTS not supported notice */
+  .tts-unsupported {
+    display: none;
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header relative z-10">
+  <div class="max-w-5xl mx-auto px-4 py-8 md:py-12">
+    <div class="header-deco select-none">Dict</div>
+    <div class="relative z-10">
+      <div class="flex items-baseline gap-3 mb-1">
+        <span class="mono-font text-xs text-yellow-400 tracking-widest uppercase opacity-80">Kamus</span>
+        <span class="mono-font text-xs text-gray-500 tracking-widest">v1.0</span>
+      </div>
+      <h1 class="display-font text-white font-black leading-none mb-1" style="font-size: clamp(2rem, 7vw, 4rem);">
+        PhrasalVerb<em class="not-italic" style="color: var(--accent);">Dict</em>
+      </h1>
+      <p class="text-gray-400 font-light text-sm md:text-base mt-2">
+        Kamus Phrasal Verb & Idiom — Inggris &rarr; Indonesia &nbsp;·&nbsp; <span id="total-count" class="text-white font-semibold">367</span> entri
+      </p>
+    </div>
+  </div>
+</header>
+
+<!-- WORD OF THE DAY -->
+<div id="wotd-section" class="wotd-banner relative z-10">
+  <div class="max-w-5xl mx-auto px-4 py-4 md:py-5">
+    <div class="flex items-start md:items-center gap-4 flex-col md:flex-row">
+      <div class="mono-font text-xs text-yellow-400 tracking-widest uppercase whitespace-nowrap opacity-90 flex-shrink-0">
+        ✦ Kata Acak
+      </div>
+      <div class="flex-1">
+        <span id="wotd-keyword" class="display-font text-white font-bold text-xl cursor-pointer hover:text-yellow-300 transition-colors" onclick="goToWord(wotdEntry)"></span>
+        <button class="speak-btn ml-2 align-middle" id="spk-wotd" onclick="speakWotd()" title="Dengarkan pengucapan" style="border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:white;">
+          <svg class="speaker-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <span class="wave-bars"><span></span><span></span><span></span><span></span><span></span></span>
+        </button>
+        <span class="text-gray-400 mx-2">—</span>
+        <span id="wotd-arti" class="text-gray-300 text-sm"></span>
+      </div>
+      <button class="btn-random flex-shrink-0" onclick="setRandomWotd()">
+        ↻ Acak
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="max-w-5xl mx-auto px-4 py-6 relative z-10">
+
+  <!-- Search + Controls -->
+  <div class="mb-6">
+    <!-- Search -->
+    <div class="search-wrapper mb-4">
+      <input
+        type="search"
+        id="search-input"
+        placeholder="Cari phrasal verb atau arti… (e.g. break, menangani)"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+      <span class="search-icon" id="search-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </span>
+      <span class="search-clear" id="search-clear" onclick="clearSearch()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </span>
+    </div>
+
+    <!-- TTS Settings Bar -->
+    <div class="tts-settings-bar mb-3" id="tts-bar">
+      <span class="tts-label">🔊 Suara</span>
+      <div class="flex gap-1" id="accent-chips">
+        <button class="accent-chip active" data-accent="en-US" onclick="setAccent('en-US',this)">🇺🇸 US</button>
+        <button class="accent-chip" data-accent="en-GB" onclick="setAccent('en-GB',this)">🇬🇧 UK</button>
+        <button class="accent-chip" data-accent="en-AU" onclick="setAccent('en-AU',this)">🇦🇺 AU</button>
+      </div>
+      <div class="flex items-center gap-2 ml-2">
+        <span class="tts-label">Kecepatan</span>
+        <input type="range" class="tts-range" id="tts-rate" min="0.5" max="1.5" step="0.1" value="0.85" oninput="updateRate(this.value)">
+        <span class="tts-val" id="tts-rate-val">0.85×</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="tts-label">Nada</span>
+        <input type="range" class="tts-range" id="tts-pitch" min="0.5" max="2" step="0.1" value="1" oninput="updatePitch(this.value)">
+        <span class="tts-val" id="tts-pitch-val">1.0</span>
+      </div>
+      <span class="tts-unsupported" id="tts-unsupported">Browser tidak mendukung TTS</span>
+    </div>
+
+    <!-- Controls row -->
+    <div class="flex flex-wrap items-center gap-3 justify-between">
+      <!-- Alphabet filter -->
+      <div class="flex flex-wrap gap-1" id="alpha-filter">
+        <button class="alpha-btn all-btn active" onclick="filterAlpha('ALL')">ALL</button>
+      </div>
+      <!-- View toggle + stats -->
+      <div class="flex items-center gap-2">
+        <div id="result-stats" class="stats-badge"></div>
+        <button class="view-btn active" id="view-list" onclick="setView('list')">≡ List</button>
+        <button class="view-btn" id="view-grid" onclick="setView('grid')">⊞ Grid</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entries -->
+  <div id="entries-container" class="space-y-1"></div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="empty-state hidden">
+    <div class="empty-state-icon">📖</div>
+    <p class="display-font text-2xl font-bold mb-2" style="color: var(--ink);">Tidak ditemukan</p>
+    <p class="text-sm" style="color: var(--muted);">Coba kata kunci lain atau pilih huruf berbeda.</p>
+    <button class="btn-random mt-6" onclick="clearSearch()">← Tampilkan Semua</button>
+  </div>
+</main>
+
+<footer>
+  PhrasalDict &nbsp;·&nbsp; Data: alfc9398_dictionary &nbsp;·&nbsp; 367 phrasal verb & idiom
+</footer>
+
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// =====================
+// DATA
+// =====================
+const DICT_DATA = [{"id":1,"kata":"Abandon to","arti":"membiarkan, menyerahkan","penjelasan":"1 menyerahkan. They abandoned the city to the enemies 2 membiarkan. You may not abandon yourself to despair."},{"id":3,"kata":"Account for","arti":"menjelaskan, menjadi penyebab","penjelasan":"1 menjelaskan. The minister must account for the budget deficit.\n2 menjadi penyebab. Pollution accounts for many respiratory diseases."},{"id":4,"kata":"Act on","arti":"bertindak atas dasar.\n1 berdasarkan saran. The police acted on the tip-off from a witness.\n2 mengikuti informasi. The government will act on the new findings","penjelasan":""},{"id":5,"kata":"Act up","arti":"tidak berfungsi dengan baik, berulah.\n1 rusak. My phone is acting up again.\n2 berulah. The kids started acting up in class","penjelasan":""},{"id":6,"kata":"Add up","arti":"masuk akal, menjumlahkan.\n1 masuk akal. Her story just doesn't add up.\n2 menjumlahkan. He added up the receipts and made a report","penjelasan":""},{"id":7,"kata":"Agree on","arti":"menyepakati bersama.\n1 mencapai kesepakatan. They agreed on the terms of the contract.\n2 setuju terhadap sesuatu. All members agreed on the proposal","penjelasan":""},{"id":8,"kata":"Aim at","arti":"menargetkan, bertujuan untuk.\n1 menargetkan. The campaign is aimed at young voters.\n2 bertujuan untuk. This measure aims at reducing crime","penjelasan":""},{"id":9,"kata":"Answer for","arti":"bertanggung jawab atas.\n1 bertanggung jawab. You will have to answer for your behavior.\n2 mempertanggungjawabkan. He answered for the mistakes made by his team","penjelasan":""},{"id":10,"kata":"Apply for","arti":"mengajukan permohonan.\n1 melamar pekerjaan. She applied for a job at the company.\n2 meminta secara resmi. They applied for a government grant","penjelasan":""},{"id":11,"kata":"Argue for","arti":"mendukung, memperjuangkan.\n1 mendukung ide. The scientist argued for stricter regulations.\n2 memperjuangkan. They argue for better public healthcare","penjelasan":""},{"id":12,"kata":"Arrive at","arti":"mencapai (kesimpulan, keputusan).\n1 kesimpulan. The committee arrived at a unanimous decision.\n2 hasil akhir. After long talks, they arrived at an agreement","penjelasan":""},{"id":13,"kata":"Ask for","arti":"meminta.\n1 permintaan. She asked for more time to complete the report.\n2 menginginkan. They're asking for justice and fair treatment","penjelasan":""},{"id":14,"kata":"Attend to","arti":"memperhatikan, menangani.\n1 menangani masalah. A nurse attended to the injured man.\n2 memperhatikan detail. He always attends to small details","penjelasan":""},{"id":15,"kata":"Act out","arti":"memperagakan, melampiaskan.\n1 memperagakan. The children acted out the story in drama class.\n2 melampiaskan emosi. He acted out his frustration by yelling","penjelasan":""},{"id":16,"kata":"Add to","arti":"menambah, memperbesar.\n1 menambah jumlah. The discovery adds to our understanding of space.\n2 memperbesar efek. His presence added to the tension in the room","penjelasan":""},{"id":17,"kata":"Back and forth","arti":"mondar mandir, maju mundur, berayun-ayun. 1 mondar-mandir. He walked back and forth in front of my house. 2 maju mundur. She rocked herself back and forth in a rocking chair. 3 berayun-ayun. Pulleys slide back and forth on the contruction site.","penjelasan":""},{"id":18,"kata":"Back down","arti":"mundur, menyerah.\n1 menyerah pada tekanan. The government backed down after massive protests.\n2 menarik pernyataan. She refused to back down from her position","penjelasan":""},{"id":19,"kata":"Back up","arti":"mendukung, mencadangkan.\n1 mendukung. The witnesses backed up his version of the story.\n2 mencadangkan data. Make sure to back up your files regularly","penjelasan":""},{"id":20,"kata":"Bank on","arti":"mengandalkan, berharap.\n1 mengandalkan. They're banking on a win in the next election.\n2 berharap. You can't always bank on good weather","penjelasan":""},{"id":21,"kata":"Bear out","arti":"membenarkan, menguatkan.\n1 membenarkan. The evidence bears out his innocence.\n2 menguatkan klaim. Studies bear out the theory","penjelasan":""},{"id":22,"kata":"Break away","arti":"memisahkan diri, melarikan diri.\n1 memisahkan diri. Several members broke away from the main party.\n2 melarikan diri. The prisoner broke away during transfer","penjelasan":""},{"id":23,"kata":"Break down","arti":"rusak, runtuh.\n1 rusak. The engine broke down on the highway.\n2 runtuh secara emosional. She broke down in tears after hearing the news","penjelasan":""},{"id":24,"kata":"Break into","arti":"membobol, mulai terlibat.\n1 membobol. Thieves broke into the house last night.\n2 mulai terlibat. He broke into journalism in his early 20s","penjelasan":""},{"id":25,"kata":"Break out","arti":"meletus, melarikan diri.\n1 meletus (konflik, penyakit). War broke out in the region.\n2 melarikan diri. Several prisoners broke out of jail","penjelasan":""},{"id":26,"kata":"Break up","arti":"bubar, memecah.\n1 bubar. The meeting broke up after three hours.\n2 memecah. Police broke up the protest","penjelasan":""},{"id":27,"kata":"Bring about","arti":"menyebabkan, menghasilkan.\n1 menyebabkan perubahan. The new policy brought about major improvements.\n2 menghasilkan situasi. His speech brought about a new atmosphere of hope","penjelasan":""},{"id":28,"kata":"Bring forward","arti":"mengajukan, mempercepat.\n1 mengajukan. They brought forward a new proposal.\n2 mempercepat jadwal. The date of the meeting was brought forward","penjelasan":""},{"id":29,"kata":"Bring in","arti":"mendatangkan, menghasilkan.\n1 mendatangkan pendapatan. The new product brought in millions of dollars.\n2 memperkenalkan (aturan baru). The government brought in new regulations","penjelasan":""},{"id":30,"kata":"Bring up","arti":"membesarkan, mengangkat topik.\n1 membesarkan anak. She was brought up by her grandmother.\n2 mengangkat topik. He brought up the issue during the meeting","penjelasan":""},{"id":31,"kata":"Build on","arti":"membangun berdasarkan, mengembangkan.\n1 melanjutkan sesuatu. We need to build on last year's success.\n2 mengembangkan. The theory builds on previous research","penjelasan":""},{"id":32,"kata":"Bump into","arti":"bertemu secara tidak sengaja.\n1 bertemu orang. I bumped into my old friend at the mall.\n2 menabrak. He accidentally bumped into the table","penjelasan":""},{"id":33,"kata":"Calculate on","arti":"memperhitungkan, bergantung pada. 1 bergantung","penjelasan":""},{"id":34,"kata":"Come upon","arti":"menyerang secara mendadak, menemukan","penjelasan":"1 menemukan. She came upon a solution to the problem."},{"id":35,"kata":"Call for","arti":"menyerukan, membutuhkan.\n1 menyerukan. The protesters called for immediate reforms.\n2 membutuhkan. This situation calls for urgent action","penjelasan":""},{"id":36,"kata":"Call off","arti":"membatalkan.\n1 membatalkan acara. The press conference was called off due to the storm.\n2 menghentikan. They called off the search after three days","penjelasan":""},{"id":37,"kata":"Call on","arti":"meminta, mengunjungi.\n1 meminta (secara resmi). The president called on citizens to stay calm.\n2 mengunjungi. He called on an old friend while in town","penjelasan":""},{"id":38,"kata":"Carry on","arti":"melanjutkan.\n1 terus melakukan sesuatu. Despite the interruption, she carried on talking.\n2 melanjutkan kegiatan. They carried on with the project","penjelasan":""},{"id":39,"kata":"Carry out","arti":"melaksanakan, melakukan.\n1 melaksanakan tugas. The team carried out the investigation.\n2 melakukan rencana. They carried out the attack at night","penjelasan":""},{"id":40,"kata":"Catch on","arti":"menjadi populer, mengerti.\n1 menjadi populer. This new trend is catching on quickly.\n2 mengerti. He didn't catch on to the joke at first","penjelasan":""},{"id":41,"kata":"Catch up","arti":"menyusul, mengejar ketertinggalan.\n1 menyusul ketertinggalan. She's trying to catch up with her studies.\n2 mengejar orang. He ran to catch up with his friends","penjelasan":""},{"id":42,"kata":"Check in","arti":"mendaftar, lapor masuk.\n1 mendaftar hotel/bandara. They checked in at the hotel at noon.\n2 melaporkan kedatangan. Reporters must check in at the front desk","penjelasan":""},{"id":43,"kata":"Check out","arti":"memeriksa, keluar.\n1 memeriksa. Check out this article on climate change.\n2 keluar dari hotel. We checked out early this morning","penjelasan":""},{"id":44,"kata":"Clear up","arti":"menjelaskan, membaik (cuaca).\n1 menjelaskan. He tried to clear up the misunderstanding.\n2 membaik. The weather cleared up in the afternoon","penjelasan":""},{"id":45,"kata":"Come across","arti":"menemukan, terlihat.\n1 menemukan tanpa sengaja. I came across an interesting article yesterday.\n2 terlihat sebagai. He comes across as very confident","penjelasan":""},{"id":46,"kata":"Come up with","arti":"menghasilkan (ide/gagasan).\n1 menemukan ide. She came up with a brilliant solution.\n2 mencetuskan. They came up with a new marketing strategy","penjelasan":""},{"id":47,"kata":"Come out","arti":"muncul, diterbitkan, terbuka.\n1 diterbitkan. The new report came out last week.\n2 menjadi diketahui. The truth came out during the trial","penjelasan":""},{"id":48,"kata":"Count on","arti":"mengandalkan.\n1 mempercayakan. We can count on her to lead the project.\n2 bergantung pada. You can count on public support","penjelasan":""},{"id":49,"kata":"Cut down on","arti":"mengurangi.\n1 mengurangi penggunaan. We need to cut down on energy consumption.\n2 menghemat. He cut down on sugar for health reasons","penjelasan":""},{"id":50,"kata":"Dally with","arti":"bermain-main (tidak serius). He likes dallying with a girl","penjelasan":""},{"id":51,"kata":"Deal with","arti":"menangani, berurusan dengan.\n1 menangani masalah. The police are dealing with the situation carefully.\n2 berurusan dengan orang. She had to deal with a difficult client","penjelasan":""},{"id":52,"kata":"Depend on","arti":"bergantung pada, tergantung.\n1 bergantung pada seseorang. You can depend on him for help.\n2 tergantung pada kondisi. It depends on the weather","penjelasan":""},{"id":53,"kata":"Die down","arti":"mereda, berkurang.\n1 mereda (suara, kerusuhan, badai). The storm finally died down.\n2 tenang kembali. The excitement died down after the speech","penjelasan":""},{"id":54,"kata":"Die out","arti":"punah, menghilang.\n1 punah secara alami. Many species have died out due to deforestation.\n2 lenyap secara bertahap. Traditional customs are dying out","penjelasan":""},{"id":55,"kata":"Do away with","arti":"menghapuskan, menyingkirkan.\n1 menghapuskan kebijakan. The law was done away with in 2020.\n2 menyingkirkan. They want to do away with old systems","penjelasan":""},{"id":56,"kata":"Do up","arti":"memperbaiki, mengencangkan.\n1 memperbaiki rumah. They're doing up the old house.\n2 mengencangkan tali/pakaian. Do up your shoelaces","penjelasan":""},{"id":57,"kata":"Drag on","arti":"berlarut-larut.\n1 berlangsung terlalu lama. The meeting dragged on for hours.\n2 membosankan. The speech dragged on and bored the audience","penjelasan":""},{"id":58,"kata":"Draw up","arti":"menyusun (dokumen).\n1 menyusun rencana/kontrak. They drew up a new agreement.\n2 menyiapkan dokumen resmi. A lawyer will draw up the will","penjelasan":""},{"id":59,"kata":"Dress up","arti":"berdandan, mengenakan pakaian formal.\n1 berdandan. She dressed up for the gala dinner.\n2 mengenakan kostum. The kids dressed up as superheroes","penjelasan":""},{"id":60,"kata":"Drop by","arti":"mampir.\n1 berkunjung sebentar. He dropped by to say hello.\n2 singgah tanpa janji. Feel free to drop by anytime","penjelasan":""},{"id":61,"kata":"Drop off","arti":"menurunkan, menurun.\n1 menurunkan orang/barang. He dropped me off at the station.\n2 menurun drastis. Sales dropped off after the holidays","penjelasan":""},{"id":62,"kata":"Drop out","arti":"keluar dari (sekolah, kompetisi).\n1 berhenti sekolah. He dropped out of college in his second year.\n2 mundur dari lomba. She dropped out of the competition due to injury","penjelasan":""},{"id":63,"kata":"Dry up","arti":"mengering, habis.\n1 mengering (air, sungai). The river dried up during the drought.\n2 habis (dana, ide). Their funding has dried up","penjelasan":""},{"id":64,"kata":"Dawn on","arti":"mulai menyadari.\n1 mulai disadari. It suddenly dawned on me that I was late.\n2 baru menyadari sesuatu. The truth slowly dawned on him","penjelasan":""},{"id":65,"kata":"Ease away","arti":"melepaskan dengan perlahan-lahan","penjelasan":"The boatman eased away the tackle."},{"id":66,"kata":"Ease off","arti":"mereda, berkurang.\n1 mereda (kemacetan, tekanan). Traffic eased off after rush hour.\n2 berkurang intensitasnya. The pain began to ease off","penjelasan":""},{"id":67,"kata":"Eat out","arti":"makan di luar rumah.\n1 makan di restoran. We usually eat out on weekends.\n2 tidak makan di rumah. They ate out during their vacation","penjelasan":""},{"id":68,"kata":"Embark on","arti":"memulai (proyek besar).\n1 memulai perjalanan/proyek. The company has embarked on a new strategy.\n2 memulai kegiatan penting. She embarked on her career in journalism","penjelasan":""},{"id":69,"kata":"End in","arti":"berakhir dengan.\n1 berakhir (hasil). The debate ended in chaos.\n2 menghasilkan. The discussion ended in a mutual agreement","penjelasan":""},{"id":70,"kata":"End up","arti":"berakhir, akhirnya.\n1 berakhir secara tak terduga. He ended up in jail.\n2 akhirnya menjadi. They ended up choosing the cheaper option","penjelasan":""},{"id":71,"kata":"Engage in","arti":"terlibat dalam.\n1 berpartisipasi dalam aktivitas. They engaged in peaceful protest.\n2 terlibat dalam konflik. The army engaged in combat","penjelasan":""},{"id":72,"kata":"Enter into","arti":"memulai perjanjian atau hubungan formal.\n1 memulai kontrak. The two countries entered into a trade agreement.\n2 menjalin hubungan. They entered into a partnership","penjelasan":""},{"id":73,"kata":"Even out","arti":"meratakan, menyeimbangkan.\n1 meratakan permukaan. Use a spatula to even out the surface.\n2 menyeimbangkan situasi. The score evened out by halftime","penjelasan":""},{"id":74,"kata":"Expand on","arti":"menjelaskan lebih lanjut.\n1 memperluas penjelasan. Could you expand on your point?\n2 memberikan detail tambahan. She expanded on her research findings","penjelasan":""},{"id":75,"kata":"Eye up","arti":"memperhatikan, menatap penuh minat.\n1 menatap dengan minat. He eyed up the last slice of cake.\n2 mengamati dengan intens. The player was eyeing up the goal","penjelasan":""},{"id":76,"kata":"Ease into","arti":"mulai melakukan secara perlahan.\n1 mulai perlahan. She eased into her new role as manager.\n2 beradaptasi secara bertahap. He eased into retirement comfortably","penjelasan":""},{"id":77,"kata":"Edge out","arti":"menyingkirkan secara tipis.\n1 menang tipis. She edged out her rival in the final race.\n2 mengalahkan dengan selisih kecil. The team edged out their opponents by one point","penjelasan":""},{"id":78,"kata":"Eat into","arti":"mengikis, mengurangi.\n1 mengurangi secara bertahap. Inflation is eating into people's savings.\n2 menggerogoti sumber daya. The cost of living eats into the budget","penjelasan":""},{"id":79,"kata":"End off","arti":"mengakhiri.\n1 menutup (acara, kegiatan). Let's end off the evening with a toast.\n2 menyelesaikan. He ended off his speech with a quote","penjelasan":""},{"id":80,"kata":"Edge up","arti":"naik perlahan.\n1 meningkat perlahan (harga/data). Oil prices edged up last week.\n2 naik sedikit demi sedikit. The unemployment rate edged up in May","penjelasan":""},{"id":81,"kata":"Face about","arti":"berbalik menghadap ke belakang","penjelasan":"The captain ordered his company to face about."},{"id":82,"kata":"Face down","arti":"mengalahkan (melawan) musuh dengan berani, terlungkup","penjelasan":"He faced his opponent down in the argument."},{"id":83,"kata":"Face on","arti":"menghadapi kesukaran","penjelasan":""},{"id":84,"kata":"Face up to","arti":"menghadapi (kenyataan, masalah).\n1 menerima kenyataan. We must face up to the challenges of climate change.\n2 tidak menghindar. He needs to face up to his mistakes","penjelasan":""},{"id":85,"kata":"Fall apart","arti":"hancur, runtuh.\n1 secara fisik hancur. The old building is falling apart.\n2 runtuh secara emosional. She fell apart after losing her job","penjelasan":""},{"id":86,"kata":"Fall back on","arti":"mengandalkan saat darurat.\n1 bergantung saat pilihan lain tidak tersedia. When income fell, they fell back on their savings.\n2 mencari bantuan cadangan. He fell back on his experience in difficult times","penjelasan":""},{"id":87,"kata":"Fall behind","arti":"tertinggal.\n1 tertinggal dalam jadwal. The project fell behind due to lack of funding.\n2 tertinggal dalam pelajaran. She fell behind in class after being sick","penjelasan":""},{"id":88,"kata":"Fall through","arti":"gagal terjadi.\n1 rencana gagal. Their business deal fell through at the last minute.\n2 batal. The merger fell through due to disagreements","penjelasan":""},{"id":89,"kata":"Figure out","arti":"memahami, memecahkan.\n1 menemukan solusi. We need to figure out a way to reduce costs.\n2 memahami masalah. She finally figured out how to fix the device","penjelasan":""},{"id":90,"kata":"Fill in","arti":"mengisi, menggantikan.\n1 mengisi formulir. Please fill in the registration form.\n2 menggantikan sementara. Can you fill in for me at the meeting?","penjelasan":""},{"id":91,"kata":"Find out","arti":"mengetahui, menemukan.\n1 mengetahui fakta. The public found out about the scandal through the media.\n2 memperoleh informasi. She found out he was lying","penjelasan":""},{"id":92,"kata":"Follow up","arti":"menindaklanjuti.\n1 melanjutkan. The police followed up on the tip.\n2 menghubungi kembali. We will follow up with an email","penjelasan":""},{"id":93,"kata":"Frown on","arti":"tidak menyetujui.\n1 memandang negatif. Cheating is frowned on in this institution.\n2 tidak disukai secara sosial. The practice is frowned on by many experts","penjelasan":""},{"id":94,"kata":"Fill out","arti":"mengisi secara lengkap.\n1 melengkapi formulir. He filled out the job application carefully.\n2 memenuhi seluruh ruang. The stadium filled out quickly","penjelasan":""},{"id":95,"kata":"Fish for","arti":"mencari (secara halus atau tidak langsung).\n1 mencari pujian. He's always fishing for compliments.\n2 mencoba mendapat jawaban. She kept fishing for information","penjelasan":""},{"id":96,"kata":"Follow through","arti":"menyelesaikan sampai akhir.\n1 menyelesaikan tugas. You must follow through on your promises.\n2 tidak berhenti di tengah jalan. The team failed to follow through with their plan","penjelasan":""},{"id":97,"kata":"Fall for","arti":"jatuh cinta, tertipu.\n1 jatuh cinta. He fell for her instantly.\n2 tertipu. Don't fall for online scams","penjelasan":""},{"id":98,"kata":"Fight off","arti":"melawan, mengusir.\n1 melawan serangan. The troops fought off the attackers.\n2 melawan penyakit. She fought off the flu with rest and medicine","penjelasan":""},{"id":99,"kata":"Gab on","arti":"mengobrol. They gabbed on the phone","penjelasan":""},{"id":100,"kata":"Gab over","arti":"pikirannya sedikit lemah karena usianya, sedikit tergila-gila","penjelasan":""},{"id":101,"kata":"Get ahead","arti":"maju, sukses.\n1 meraih kemajuan. She's working hard to get ahead in her career.\n2 menjadi lebih unggul. Companies that innovate quickly often get ahead","penjelasan":""},{"id":102,"kata":"Get around","arti":"mengatasi, menyebar.\n1 mengatasi masalah. We found a way to get around the regulations.\n2 tersebar luas. News of the scandal quickly got around","penjelasan":""},{"id":103,"kata":"Get at","arti":"menyindir, mengisyaratkan.\n1 menyampaikan maksud tersembunyi. What are you trying to get at?\n2 menyindir secara halus. He's clearly getting at something","penjelasan":""},{"id":104,"kata":"Get away","arti":"melarikan diri.\n1 kabur. The thief got away before the police arrived.\n2 pergi untuk istirahat. We're planning to get away for the weekend","penjelasan":""},{"id":105,"kata":"Get back","arti":"kembali, membalas.\n1 kembali ke tempat semula. He got back from Jakarta last night.\n2 membalas dendam. She promised to get back at him someday","penjelasan":""},{"id":106,"kata":"Get by","arti":"bertahan hidup, cukup.\n1 bertahan dengan sedikit. They get by on a small income.\n2 hidup sederhana. It's hard to get by in a big city with low wages","penjelasan":""},{"id":107,"kata":"Get in","arti":"masuk, tiba.\n1 memasuki tempat/ruangan. She got in through the back door.\n2 tiba. The train got in late","penjelasan":""},{"id":108,"kata":"Get off","arti":"turun, bebas (hukuman).\n1 turun dari kendaraan. We got off at the next station.\n2 lolos dari hukuman berat. He got off with just a warning","penjelasan":""},{"id":109,"kata":"Get on","arti":"naik kendaraan, berkembang.\n1 naik. She got on the bus to school.\n2 membuat kemajuan. He's getting on well in his new job","penjelasan":""},{"id":110,"kata":"Get out","arti":"keluar, menyebar.\n1 keluar dari tempat. He got out of the building safely.\n2 tersebar (berita). Word got out about the secret plan","penjelasan":""},{"id":111,"kata":"Get over","arti":"sembuh, mengatasi.\n1 pulih dari sakit. She got over the flu quickly.\n2 mengatasi masalah. It took him years to get over the loss","penjelasan":""},{"id":112,"kata":"Give away","arti":"memberikan, membocorkan.\n1 memberikan secara cuma-cuma. They gave away free samples.\n2 membocorkan rahasia. His expression gave him away","penjelasan":""},{"id":113,"kata":"Give up","arti":"menyerah, berhenti.\n1 menyerah dari usaha. They gave up after several failed attempts.\n2 berhenti kebiasaan buruk. He gave up smoking last year","penjelasan":""},{"id":114,"kata":"Hack about","arti":"memotong (dengan pisau atau benda tajam)","penjelasan":""},{"id":115,"kata":"Hack around","arti":"keluyuran, mengeluyur","penjelasan":"1 berkeluyuran. He likes hacking around."},{"id":116,"kata":"Hand in","arti":"menyerahkan (tugas, dokumen).\n1 menyerahkan pekerjaan. Students must hand in their assignments by Friday.\n2 menyerahkan laporan. He handed in his resignation yesterday","penjelasan":""},{"id":117,"kata":"Hand out","arti":"membagikan.\n1 membagikan secara langsung. The volunteers handed out food to the victims.\n2 mendistribusikan. They handed out leaflets on climate awareness","penjelasan":""},{"id":118,"kata":"Hang on","arti":"menunggu, bertahan.\n1 menunggu sebentar. Hang on, I'll be right back.\n2 bertahan dalam situasi sulit. They had to hang on during the crisis","penjelasan":""},{"id":119,"kata":"Hang out","arti":"bersantai, menghabiskan waktu.\n1 berkumpul santai. They often hang out at the café after work.\n2 nongkrong. Teens love to hang out at the mall","penjelasan":""},{"id":120,"kata":"Head for","arti":"menuju ke.\n1 pergi ke suatu arah/tempat. They are heading for the airport now.\n2 bersiap menghadapi. The region is heading for economic trouble","penjelasan":""},{"id":121,"kata":"Hear about","arti":"mendengar kabar tentang.\n1 mendapat informasi. I just heard about the earthquake this morning.\n2 menerima berita. Have you heard about the new policy?","penjelasan":""},{"id":122,"kata":"Hear from","arti":"menerima kabar dari seseorang.\n1 dihubungi. We haven't heard from him in months.\n2 mendapat jawaban. You should hear from them by next week","penjelasan":""},{"id":123,"kata":"Heat up","arti":"memanas, menjadi lebih serius.\n1 menjadi panas secara fisik. The soup is heating up.\n2 meningkat intensitasnya. The political debate is heating up","penjelasan":""},{"id":124,"kata":"Hold back","arti":"menahan, menyembunyikan.\n1 menahan emosi. He held back his tears.\n2 tidak mengungkapkan sepenuhnya. She held back some important details","penjelasan":""},{"id":125,"kata":"Hold on","arti":"bertahan, tunggu sebentar.\n1 bertahan menghadapi kesulitan. They held on during the recession.\n2 tunggu sebentar. Hold on a minute—I'm not ready","penjelasan":""},{"id":126,"kata":"Hold out","arti":"bertahan, menawarkan.\n1 bertahan dalam situasi sulit. The soldiers held out for two weeks.\n2 menawarkan harapan. Doctors held out little hope for recovery","penjelasan":""},{"id":127,"kata":"Hold up","arti":"menunda, merampok.\n1 menunda sesuatu. Traffic was held up by an accident.\n2 merampok. The robbers held up the bank","penjelasan":""},{"id":128,"kata":"Hook up","arti":"menghubungkan, menjalin hubungan.\n1 menghubungkan alat. They hooked up the printer to the computer.\n2 mulai berhubungan. They hooked up after the party","penjelasan":""},{"id":129,"kata":"Hurry up","arti":"bergegas, mempercepat.\n1 segera menyelesaikan. Hurry up, we're going to be late!\n2 mempercepat proses. They had to hurry up the construction","penjelasan":""},{"id":130,"kata":"Hype up","arti":"membesar-besarkan.\n1 membangun ekspektasi tinggi. The media hyped up the new film.\n2 mempromosikan secara berlebihan. The product was hyped up but failed in the market","penjelasan":""},{"id":131,"kata":"Identify oneself with","arti":"menjadi bagian (kelompok, organisasi, yayasan, etc)","penjelasan":"To be associated with or give one's full support or interest to a group."},{"id":132,"kata":"Iron out","arti":"menyelesaikan, merapikan.\n1 menyelesaikan masalah. They met to iron out the differences in the contract.\n2 merapikan rencana. Let's iron out the details before we sign the deal","penjelasan":""},{"id":133,"kata":"Invest in","arti":"berinvestasi dalam.\n1 menanamkan modal. The company is investing in renewable energy.\n2 mengalokasikan waktu atau usaha. She invested a lot of time in that project","penjelasan":""},{"id":134,"kata":"Insist on","arti":"bersikeras atas sesuatu.\n1 tidak mau mengalah. He insisted on paying the bill.\n2 memaksa. They insisted on seeing the manager","penjelasan":""},{"id":135,"kata":"Inform on","arti":"melaporkan (seseorang), menjadi informan.\n1 memberi informasi kepada pihak berwenang. He was arrested after a colleague informed on him.\n2 menjadi saksi. She refused to inform on her friends","penjelasan":""},{"id":136,"kata":"Inquire into","arti":"menyelidiki.\n1 melakukan penyelidikan resmi. The committee will inquire into the financial scandal.\n2 mencari tahu secara mendalam. The judge inquired into the witness's background","penjelasan":""},{"id":137,"kata":"Interfere with","arti":"mengganggu, mencampuri.\n1 mengganggu proses. Noise interferes with concentration.\n2 mencampuri urusan orang lain. You shouldn't interfere with their decision","penjelasan":""},{"id":138,"kata":"Issue from","arti":"berasal dari, keluar dari.\n1 muncul dari sumber. Smoke issued from the burning building.\n2 keluar (secara formal atau fisik). The sound issued from behind the door","penjelasan":""},{"id":139,"kata":"Identify with","arti":"merasa sejalan dengan, mengidentifikasi diri.\n1 merasa terhubung. Many voters identify with his views.\n2 menyamakan diri. She identifies with the struggles of refugees","penjelasan":""},{"id":140,"kata":"Impose on","arti":"memaksakan kepada.\n1 mengenakan (aturan, beban). The government imposed a tax on luxury goods.\n2 menyusahkan orang lain. I hope I'm not imposing on you","penjelasan":""},{"id":141,"kata":"Improve on","arti":"meningkatkan dari versi sebelumnya.\n1 memperbaiki. They hope to improve on last year's performance.\n2 melakukan lebih baik dari sebelumnya. The athlete improved on her own record","penjelasan":""},{"id":142,"kata":"Ink in","arti":"menuliskan (jadwal), merencanakan.\n1 menandai dalam kalender. I've inked in our meeting for next Thursday.\n2 menjadwalkan secara sementara. We inked in the appointment, subject to confirmation","penjelasan":""},{"id":143,"kata":"Intrude on","arti":"mengganggu privasi.\n1 memasuki tanpa izin. Reporters intruded on the grieving family's privacy.\n2 mengganggu secara tidak sopan. Sorry to intrude on your conversation","penjelasan":""},{"id":144,"kata":"Infringe on","arti":"melanggar, mengganggu hak.\n1 melanggar hak hukum. The law infringes on freedom of speech.\n2 membatasi kebebasan. This rule may infringe on civil liberties","penjelasan":""},{"id":145,"kata":"Indulge in","arti":"menikmati (biasanya berlebihan).\n1 memanjakan diri. She indulged in a luxury spa day.\n2 melakukan sesuatu secara berlebihan. He indulges in gossip too often","penjelasan":""},{"id":146,"kata":"Ink out","arti":"mencoret, menghapus dengan sengaja.\n1 mencoret dari dokumen. They inked out several clauses in the contract.\n2 menghapus secara sengaja. She inked out his name from the list","penjelasan":""},{"id":147,"kata":"Jabber out","arti":"berbicara dengan cepat","penjelasan":"1 mengatakan dengan cepat. He jabbered out his girlfriend's name."},{"id":148,"kata":"Jack in","arti":"menghentikan (pekerjaan)","penjelasan":""},{"id":149,"kata":"Jack up","arti":"menaikkan secara drastis.\n1 menaikkan harga. The company jacked up fuel prices overnight.\n2 meningkatkan secara tiba-tiba. They jacked up interest rates to control inflation","penjelasan":""},{"id":150,"kata":"Jot down","arti":"mencatat cepat.\n1 mencatat dengan cepat. He jotted down the meeting notes on a notepad.\n2 menuliskan secara singkat. I'll jot down your number","penjelasan":""},{"id":151,"kata":"Jump at","arti":"langsung menerima tawaran.\n1 menerima kesempatan dengan antusias. She jumped at the job offer.\n2 bereaksi cepat. They jumped at the chance to expand abroad","penjelasan":""},{"id":152,"kata":"Jump in","arti":"menyela, ikut campur.\n1 menyela percakapan. He jumped in before she finished speaking.\n2 cepat terlibat. The government jumped in to help flood victims","penjelasan":""},{"id":153,"kata":"Jump on","arti":"mengkritik dengan keras.\n1 mengkritik atau menegur keras. The coach jumped on the players for poor defense.\n2 menyerang secara verbal. He was jumped on by the media for his statement","penjelasan":""},{"id":154,"kata":"Join in","arti":"ikut serta.\n1 berpartisipasi. Everyone joined in the celebration.\n2 ikut bergabung. The children joined in the singing","penjelasan":""},{"id":155,"kata":"Jam up","arti":"membuat macet, tersumbat.\n1 menyumbat atau menumpuk. The broken truck jammed up the whole highway.\n2 menyebabkan kemacetan. Traffic was jammed up after the accident","penjelasan":""},{"id":156,"kata":"Jaw away","arti":"berbicara terus-menerus.\n1 ngobrol panjang lebar. The two old friends jawed away for hours.\n2 berbicara tidak penting. He kept jawing away without getting to the point","penjelasan":""},{"id":157,"kata":"Jazz up","arti":"mempercantik, membuat lebih menarik.\n1 memperindah tampilan. They jazzed up the website with new graphics.\n2 membuat lebih menarik. The article was jazzed up with colorful images","penjelasan":""},{"id":158,"kata":"Juggle with","arti":"menyeimbangkan beberapa hal.\n1 menangani banyak hal sekaligus. She's juggling with two jobs and a family.\n2 mengelola banyak tugas. Politicians juggle with multiple responsibilities","penjelasan":""},{"id":159,"kata":"Jam into","arti":"memaksakan masuk.\n1 memasukkan secara paksa. They jammed the boxes into the car.\n2 berdesakan. People jammed into the subway during rush hour","penjelasan":""},{"id":160,"kata":"Jump out at","arti":"mencolok, menarik perhatian.\n1 sangat menonjol. The headline jumped out at me immediately.\n2 langsung terlihat. Her red dress jumped out at the crowd","penjelasan":""},{"id":161,"kata":"Join up","arti":"bergabung secara resmi.\n1 bergabung (militer, organisasi). He joined up during the war.\n2 ikut serta secara resmi. Two companies joined up for a joint venture","penjelasan":""},{"id":162,"kata":"Jerk around","arti":"mempermainkan, memperlakukan tidak serius.\n1 mempermainkan orang. Stop jerking me around and tell me the truth.\n2 tidak serius. He felt the employer was jerking him around","penjelasan":""},{"id":163,"kata":"Keel over","arti":"jatuh pingsan, tersungkur","penjelasan":"1 Jatuh pingsan. The poor fellow has keeled over."},{"id":164,"kata":"Keep at","arti":"terus berusaha.\n1 tidak menyerah. She kept at her studies despite the difficulties.\n2 tetap konsisten. If you keep at it, you'll succeed","penjelasan":""},{"id":165,"kata":"Keep away","arti":"menjauhkan, menjauhi.\n1 menjauh dari bahaya. Keep away from the fire.\n2 tidak mendekati. He was told to keep away from the crime scene","penjelasan":""},{"id":166,"kata":"Keep back","arti":"menahan, menyembunyikan.\n1 menahan informasi. The police kept back certain details from the public.\n2 tidak membiarkan mendekat. Barriers were used to keep the crowd back","penjelasan":""},{"id":167,"kata":"Keep down","arti":"menekan, mengurangi.\n1 menekan jumlah. We need to keep down production costs.\n2 mencegah naik. The government is trying to keep down inflation","penjelasan":""},{"id":168,"kata":"Keep from","arti":"menahan diri dari.\n1 mencegah melakukan sesuatu. She could hardly keep from laughing.\n2 menghindari tindakan. He kept from commenting on the issue","penjelasan":""},{"id":169,"kata":"Keep in","arti":"menahan di dalam.\n1 tetap di dalam ruangan. The students were kept in during the storm.\n2 tidak membiarkan pergi. He was kept in the hospital overnight","penjelasan":""},{"id":170,"kata":"Keep off","arti":"menjauh dari, tidak menginjak.\n1 tidak menginjak area tertentu. Keep off the grass!\n2 menghindari makanan atau kebiasaan. He's trying to keep off junk food","penjelasan":""},{"id":171,"kata":"Keep on","arti":"terus melakukan.\n1 melanjutkan. She kept on talking despite the interruption.\n2 tidak berhenti. He kept on working late into the night","penjelasan":""},{"id":172,"kata":"Keep out","arti":"tidak membiarkan masuk.\n1 mencegah masuk. Keep out of the restricted area.\n2 menjauhkan dari tempat tertentu. A fence keeps out wild animals","penjelasan":""},{"id":173,"kata":"Keep to","arti":"tetap pada rencana/aturan.\n1 mengikuti jadwal. Try to keep to the deadline.\n2 mematuhi peraturan. They kept to the agreed terms","penjelasan":""},{"id":174,"kata":"Keep up","arti":"mempertahankan, mengikuti.\n1 menjaga kecepatan. Keep up the good work!\n2 mengikuti perkembangan. It's hard to keep up with the news these days","penjelasan":""},{"id":175,"kata":"Key in","arti":"memasukkan data.\n1 memasukkan informasi. She keyed in the customer's details.\n2 input melalui perangkat. Please key in your password","penjelasan":""},{"id":176,"kata":"Kick in","arti":"mulai berlaku/berfungsi.\n1 mulai efektif. The new law kicks in next month.\n2 mulai terasa efeknya. The medicine kicked in after 30 minutes","penjelasan":""},{"id":177,"kata":"Kick off","arti":"memulai, membuka.\n1 memulai acara/pertandingan. The event kicked off with a speech.\n2 memulai secara resmi. The campaign kicked off yesterday","penjelasan":""},{"id":178,"kata":"Knock out","arti":"membuat pingsan, menyingkirkan.\n1 memukul hingga pingsan. The boxer knocked out his opponent.\n2 mengeliminasi dari kompetisi. They were knocked out in the semifinals","penjelasan":""},{"id":179,"kata":"Labor at","arti":"tekun bekerja; bekerja keras, giat belajar","penjelasan":"Arif labored at his home work."},{"id":180,"kata":"Lay off","arti":"memberhentikan (pekerja).\n1 mengurangi tenaga kerja. The company laid off 200 workers last month.\n2 berhenti melakukan sesuatu. You should lay off junk food","penjelasan":""},{"id":181,"kata":"Lay out","arti":"menyusun, merancang.\n1 menyusun rencana. The document lays out the plan for reform.\n2 merancang secara visual. The brochure was beautifully laid out","penjelasan":""},{"id":182,"kata":"Lead to","arti":"menyebabkan, mengarah pada.\n1 menyebabkan hasil. Poor planning led to the project's failure.\n2 mengarah ke tempat. This path leads to the main road","penjelasan":""},{"id":183,"kata":"Leak out","arti":"bocor (informasi).\n1 tersebar secara tidak resmi. Details of the report leaked out before publication.\n2 tidak bisa disembunyikan. The news leaked out quickly","penjelasan":""},{"id":184,"kata":"Leave out","arti":"menghilangkan, tidak menyertakan.\n1 tidak disertakan. They left out important data in the report.\n2 sengaja dilewatkan. Her name was left out of the guest list","penjelasan":""},{"id":185,"kata":"Let down","arti":"mengecewakan.\n1 membuat kecewa. He let down his team by missing the penalty.\n2 gagal memenuhi harapan. The movie let down many fans","penjelasan":""},{"id":186,"kata":"Let in","arti":"membiarkan masuk.\n1 membuka akses masuk. The guard let us in without checking IDs.\n2 memasukkan seseorang. Don't let strangers in","penjelasan":""},{"id":187,"kata":"Let off","arti":"membebaskan, melepaskan.\n1 tidak menghukum berat. The judge let him off with a warning.\n2 meledakkan (kembang api). They let off fireworks for New Year's Eve","penjelasan":""},{"id":188,"kata":"Let out","arti":"mengeluarkan, mengakhiri.\n1 mengizinkan keluar. The teacher let the class out early.\n2 mengeluarkan suara. She let out a loud scream","penjelasan":""},{"id":189,"kata":"Line up","arti":"mengatur, mengantre.\n1 mengantre. People lined up for tickets.\n2 merencanakan atau menjadwalkan. They lined up a series of meetings","penjelasan":""},{"id":190,"kata":"Live up to","arti":"memenuhi harapan.\n1 sesuai dengan standar. The movie didn't live up to the hype.\n2 tidak mengecewakan. She lived up to her reputation","penjelasan":""},{"id":191,"kata":"Look after","arti":"menjaga, merawat.\n1 menjaga seseorang. She looks after her younger brother.\n2 merawat sesuatu. He's looking after the house while they're away","penjelasan":""},{"id":192,"kata":"Look around","arti":"melihat-lihat.\n1 menjelajah dengan mata. They looked around the museum.\n2 memeriksa. We looked around before choosing the apartment","penjelasan":""},{"id":193,"kata":"Look into","arti":"menyelidiki.\n1 memeriksa lebih dalam. The committee is looking into the complaint.\n2 mencari informasi. We'll look into that possibility","penjelasan":""},{"id":194,"kata":"Look out","arti":"waspada, hati-hati.\n1 memperingatkan bahaya. Look out! There's a car coming.\n2 berhati-hati terhadap sesuatu. We need to look out for fraud","penjelasan":""},{"id":195,"kata":"Mad with","arti":"sangat marah","penjelasan":""},{"id":196,"kata":"Made in","arti":"buatan","penjelasan":""},{"id":197,"kata":"Make up","arti":"membuat, mengarang, berdamai.\n1 mengarang cerita. He made up an excuse for being late.\n2 berdamai setelah bertengkar. They finally made up after weeks of arguing","penjelasan":""},{"id":198,"kata":"Make out","arti":"memahami, melihat dengan jelas.\n1 melihat atau mendengar dengan susah payah. I could barely make out what he was saying.\n2 mengerti situasi. It's hard to make out his intentions","penjelasan":""},{"id":199,"kata":"Make for","arti":"menuju, menyebabkan.\n1 bergerak ke arah. The protesters made for the city center.\n2 menyebabkan hasil. Honesty makes for strong relationships","penjelasan":""},{"id":200,"kata":"Make over","arti":"mengubah penampilan.\n1 merombak. They made over the entire apartment.\n2 mentransfer (secara hukum). He made over the property to his son","penjelasan":""},{"id":201,"kata":"Make up for","arti":"menebus, mengganti kerugian.\n1 menebus kesalahan. He tried to make up for his mistake.\n2 menggantikan waktu yang hilang. We'll make up for the lost time tomorrow","penjelasan":""},{"id":202,"kata":"Move on","arti":"melanjutkan, beranjak.\n1 berpindah ke topik baru. Let's move on to the next issue.\n2 meninggalkan masa lalu. It's time to move on after the breakup","penjelasan":""},{"id":203,"kata":"Move in","arti":"pindah masuk.\n1 mulai tinggal di tempat baru. They moved in last weekend.\n2 bergabung ke posisi atau tempat tertentu. The police moved in to break up the fight","penjelasan":""},{"id":204,"kata":"Move out","arti":"pindah keluar.\n1 meninggalkan tempat tinggal. She moved out of her parents' house.\n2 keluar dari tempat kerja atau kantor. The company moved out last year","penjelasan":""},{"id":205,"kata":"Mess up","arti":"membuat kacau.\n1 merusak atau mengacaukan. He messed up the whole project.\n2 membuat kesalahan. I really messed up during the interview","penjelasan":""},{"id":206,"kata":"Meet up","arti":"bertemu (dengan tujuan).\n1 bertemu untuk janji atau kegiatan. Let's meet up at the café after work.\n2 berkumpul. We met up with old friends during the holiday","penjelasan":""},{"id":207,"kata":"Map out","arti":"merencanakan secara detail.\n1 membuat rencana atau strategi. They mapped out a plan for expansion.\n2 menentukan arah. The route was carefully mapped out","penjelasan":""},{"id":208,"kata":"Mix up","arti":"mencampuradukkan, membingungkan.\n1 membuat bingung. I mixed up the dates and missed the flight.\n2 tertukar. The files were mixed up during printing","penjelasan":""},{"id":209,"kata":"Mark down","arti":"menurunkan harga.\n1 memberi diskon. The store marked down prices for clearance.\n2 mencatat secara negatif. The teacher marked him down for poor grammar","penjelasan":""},{"id":210,"kata":"Measure up","arti":"sebanding, memenuhi standar.\n1 sesuai dengan harapan. He doesn't measure up to the job requirements.\n2 mencapai standar. Do I measure up in your eyes?","penjelasan":""},{"id":211,"kata":"Move ahead","arti":"maju, melanjutkan ke depan.\n1 melanjutkan rencana. The project will move ahead despite delays.\n2 membuat kemajuan. She's moving ahead in her career","penjelasan":""},{"id":212,"kata":"Nag at","arti":"mengomel pada, ngomel, cerewet","penjelasan":""},{"id":213,"kata":"Narrow down","arti":"mempersempit pilihan.\n1 mengurangi jumlah opsi. They narrowed down the list to three candidates.\n2 menyaring secara selektif. We need to narrow down the causes of the issue","penjelasan":""},{"id":214,"kata":"Name after","arti":"menamai sesuai nama orang.\n1 memberikan nama dari seseorang. The school was named after a national hero.\n2 mengambil nama dari tokoh. He was named after his grandfather","penjelasan":""},{"id":215,"kata":"Note down","arti":"mencatat.\n1 menulis informasi penting. Please note down the meeting time.\n2 mencatat secara cepat. I noted down the main points of the article","penjelasan":""},{"id":216,"kata":"Nod off","arti":"tertidur (tanpa sadar).\n1 tertidur singkat. He nodded off during the long speech.\n2 terlelap. She nodded off in front of the TV","penjelasan":""},{"id":217,"kata":"Nail down","arti":"memastikan, menyelesaikan.\n1 mengonfirmasi kesepakatan. They nailed down the details of the contract.\n2 memutuskan sesuatu. We need to nail down the date of the event","penjelasan":""},{"id":218,"kata":"Nip out","arti":"keluar sebentar.\n1 pergi sebentar. I'm just nipping out to buy some milk.\n2 meninggalkan tempat untuk waktu singkat. She nipped out during lunch break","penjelasan":""},{"id":219,"kata":"Narrow in on","arti":"memusatkan perhatian.\n1 fokus ke satu hal. Investigators are narrowing in on a suspect.\n2 menyempitkan fokus pencarian. We've narrowed in on the cause of the error","penjelasan":""},{"id":220,"kata":"Nudge into","arti":"mendorong secara halus (untuk melakukan sesuatu).\n1 mendorong secara perlahan. She nudged him into speaking to the media.\n2 membujuk halus. The article nudged readers into taking action","penjelasan":""},{"id":221,"kata":"Nose around","arti":"mengintai, mencari tahu.\n1 mencari informasi diam-diam. The journalist nosed around for evidence.\n2 menggeledah secara diam-diam. Someone's been nosing around my office","penjelasan":""},{"id":222,"kata":"Narrow off","arti":"menyempit (jalan, peluang).\n1 menjadi lebih sempit. The path narrows off after the gate.\n2 membatasi ruang gerak. The road narrowed off into a trail","penjelasan":""},{"id":223,"kata":"Nail up","arti":"memaku (menutup sesuatu).\n1 menutup pakai paku. They nailed up the broken window.\n2 memperbaiki dengan paku. He nailed up the loose boards","penjelasan":""},{"id":224,"kata":"Name for","arti":"mencalonkan untuk jabatan atau penghargaan.\n1 mengusulkan nama seseorang. She was named for a leadership award.\n2 diajukan sebagai kandidat. He was named for the position of director","penjelasan":""},{"id":225,"kata":"Nestle down","arti":"berbaring nyaman.\n1 merebahkan diri dengan tenang. The child nestled down beside her mother.\n2 duduk atau tidur dengan nyaman. They nestled down in front of the fireplace","penjelasan":""},{"id":226,"kata":"Notch up","arti":"mencatat pencapaian.\n1 memperoleh kemenangan. The team notched up another win.\n2 mengumpulkan pencapaian. He notched up several awards last year","penjelasan":""},{"id":228,"kata":"Object to","arti":"keberatan terhadap.\n1 keberatan. He raised no objection to the idea.\n2 merasa keberatan. He wanted us to travel on foot but I objected","penjelasan":""},{"id":230,"kata":"Occur to","arti":"terpikirkan.\n1 muncul di pikiran. It suddenly occurred to me that I left the stove on.\n2 tersadar akan sesuatu. Has it ever occurred to you that he might be right?","penjelasan":""},{"id":231,"kata":"Open up","arti":"membuka (secara fisik atau emosional).\n1 membuka pintu atau area. They opened up a new road through the village.\n2 mulai bicara jujur. She finally opened up about her past","penjelasan":""},{"id":232,"kata":"Opt for","arti":"memilih.\n1 memilih satu dari beberapa pilihan. They opted for a cheaper solution.\n2 memutuskan berdasarkan pertimbangan. She opted for early retirement","penjelasan":""},{"id":233,"kata":"Order in","arti":"memesan makanan ke rumah/kantor.\n1 pesan antar. Let's order in tonight instead of cooking.\n2 memesan dari luar. They ordered in lunch during the meeting","penjelasan":""},{"id":234,"kata":"Overcome by","arti":"dikuasai oleh (emosi, situasi).\n1 diliputi perasaan kuat. He was overcome by emotion during the speech.\n2 tidak bisa mengendalikan. She was overcome by exhaustion","penjelasan":""},{"id":235,"kata":"Overflow with","arti":"penuh dengan, melimpah.\n1 dipenuhi sesuatu. The basket was overflowing with fruit.\n2 sangat banyak (perasaan, barang). The letter overflowed with gratitude","penjelasan":""},{"id":236,"kata":"Outnumber by","arti":"kalah jumlah.\n1 dikalahkan dalam jumlah. The rebels were outnumbered by the army.\n2 lebih sedikit dari. Female applicants were outnumbered by males","penjelasan":""},{"id":237,"kata":"Outgrow","arti":"tumbuh melebihi, tidak cocok lagi.\n1 terlalu besar untuk sesuatu. He outgrew his clothes quickly.\n2 tidak cocok lagi karena perkembangan. She outgrew the need for supervision","penjelasan":""},{"id":238,"kata":"Outlast","arti":"bertahan lebih lama dari.\n1 lebih awet. The older machines outlasted the newer ones.\n2 tidak cepat rusak atau hilang. His legacy will outlast his critics","penjelasan":""},{"id":239,"kata":"Outshine","arti":"mengalahkan dalam keunggulan.\n1 lebih bersinar. She outshone all other candidates during the interview.\n2 menonjol dari yang lain. His talent outshines his peers","penjelasan":""},{"id":240,"kata":"Overlook","arti":"mengabaikan, lalai.\n1 tidak melihat atau melewatkan. The report overlooked a crucial detail.\n2 tidak memperhatikan. They overlooked the risks involved","penjelasan":""},{"id":241,"kata":"Pace up and down","arti":"berjalan mondar-mandir, mondar-mandir","penjelasan":""},{"id":242,"kata":"Pass away","arti":"meninggal dunia.\n1 meninggal dengan halus. His grandmother passed away last night.\n2 digunakan dalam berita kematian. The famous author passed away at age 85","penjelasan":""},{"id":243,"kata":"Pass out","arti":"pingsan, membagikan.\n1 kehilangan kesadaran. She passed out from heat exhaustion.\n2 membagikan secara massal. Volunteers passed out food to refugees","penjelasan":""},{"id":244,"kata":"Pass on","arti":"meneruskan, mewariskan.\n1 menyampaikan (pesan/informasi). Please pass on my regards to your family.\n2 mewariskan. He passed on his knowledge to the next generation","penjelasan":""},{"id":245,"kata":"Pay off","arti":"melunasi, terbayar.\n1 menyelesaikan utang. She finally paid off her student loans.\n2 memberikan hasil. All that hard work paid off in the end","penjelasan":""},{"id":246,"kata":"Pick up","arti":"mengambil, belajar, meningkat.\n1 mengambil sesuatu. I'll pick up the package this afternoon.\n2 mempelajari secara informal. He picked up some Spanish while traveling.\n3 meningkat. Sales are beginning to pick up again","penjelasan":""},{"id":247,"kata":"Point out","arti":"menunjukkan, menekankan.\n1 menyatakan sesuatu secara jelas. She pointed out the error in the report.\n2 menyoroti fakta penting. The article pointed out several inconsistencies","penjelasan":""},{"id":248,"kata":"Pull over","arti":"menepi, berhenti.\n1 berhenti di pinggir jalan. The police signaled him to pull over.\n2 berhenti sementara. We pulled over to check the map","penjelasan":""},{"id":249,"kata":"Pull through","arti":"sembuh, melewati masa sulit.\n1 selamat dari penyakit berat. Doctors say she'll pull through.\n2 melewati situasi sulit. The company pulled through the financial crisis","penjelasan":""},{"id":250,"kata":"Put off","arti":"menunda.\n1 menunda jadwal. They put off the meeting until next week.\n2 membuat enggan. The smell of smoke put me off my food","penjelasan":""},{"id":251,"kata":"Put on","arti":"mengenakan, mengadakan.\n1 memakai pakaian. He put on his jacket.\n2 mengadakan acara. The school put on a concert for charity","penjelasan":""},{"id":252,"kata":"Put out","arti":"memadamkan, menerbitkan.\n1 memadamkan api. The fire department put out the blaze quickly.\n2 mengeluarkan/menerbitkan. The company put out a press release","penjelasan":""},{"id":253,"kata":"Put up with","arti":"menerima, menoleransi.\n1 menahan ketidaknyamanan. I can't put up with this noise any longer.\n2 bersabar menghadapi sesuatu. She puts up with a lot of stress at work","penjelasan":""},{"id":254,"kata":"Pull out","arti":"mundur, menarik diri.\n1 keluar dari kesepakatan. The investor pulled out at the last moment.\n2 berhenti berpartisipasi. Several teams pulled out of the tournament","penjelasan":""},{"id":255,"kata":"Patch up","arti":"memperbaiki hubungan, memperbaiki sementara.\n1 berdamai. They patched up their differences.\n2 memperbaiki sementara. The mechanic patched up the leak temporarily","penjelasan":""},{"id":256,"kata":"Pay back","arti":"membayar kembali, membalas.\n1 mengembalikan uang. He paid back the loan in full.\n2 membalas kebaikan/keburukan. She promised to pay them back for their support","penjelasan":""},{"id":257,"kata":"Quail at","arti":"membuat gemetar atau rasa takut, gemetar","penjelasan":""},{"id":258,"kata":"Quarrel with","arti":"berselisih, berkonflik.\n1 bertengkar. He quarreled with his brother over the inheritance.\n2 tidak sependapat. Few scientists quarrel with the results of the study","penjelasan":""},{"id":259,"kata":"Queue up","arti":"mengantre.\n1 berdiri dalam antrean. People queued up for hours to buy tickets.\n2 menunggu giliran. Shoppers queued up outside the store during the sale","penjelasan":""},{"id":260,"kata":"Quiet down","arti":"menjadi tenang.\n1 menjadi lebih hening. The crowd quieted down after the speech began.\n2 menurunkan volume suara. Please quiet down, the baby is sleeping","penjelasan":""},{"id":261,"kata":"Quit on","arti":"mengecewakan dengan berhenti mendadak.\n1 meninggalkan secara tiba-tiba. The engine quit on us in the middle of the trip.\n2 berhenti membantu. You can't quit on your team now","penjelasan":""},{"id":262,"kata":"Quote back","arti":"mengutip kembali ucapan seseorang.\n1 menyitir kembali. The reporter quoted back the official's previous statement.\n2 mengingatkan dengan kutipan. She quoted back what he had promised last year","penjelasan":""},{"id":263,"kata":"Quicken up","arti":"mempercepat.\n1 membuat lebih cepat. The company aims to quicken up the production cycle.\n2 mempercepat proses. They tried to quicken up the investigation","penjelasan":""},{"id":264,"kata":"Quibble over","arti":"memperdebatkan hal sepele.\n1 berdebat hal kecil. They're quibbling over the wording of the contract.\n2 mempermasalahkan detail kecil. Let's not quibble over minor issues","penjelasan":""},{"id":265,"kata":"Quench with","arti":"memuaskan (haus) dengan.\n1 memadamkan atau menghilangkan rasa haus. He quenched his thirst with cold water.\n2 menyelesaikan dengan sesuatu. The fire was quenched with foam","penjelasan":""},{"id":266,"kata":"Quest after","arti":"mencari sesuatu dengan sungguh-sungguh.\n1 mencari tujuan. He quested after truth his entire life.\n2 mengejar sesuatu. They are questing after answers in ancient texts","penjelasan":""},{"id":267,"kata":"Race along","arti":"maju dengan cepat, mengalir dengan deras","penjelasan":"The river was racing along."},{"id":268,"kata":"Rely on","arti":"mengandalkan, mempercayai.\n1 mengandalkan seseorang/hal. We rely on donations to keep the shelter open.\n2 mempercayai sepenuhnya. You can rely on her to get the job done","penjelasan":""},{"id":269,"kata":"Refer to","arti":"merujuk pada, menyebut.\n1 menyebut secara langsung. He referred to the incident in his speech.\n2 merujuk ke sumber atau hal. This term refers to economic inequality","penjelasan":""},{"id":270,"kata":"React to","arti":"bereaksi terhadap.\n1 memberikan tanggapan. The public reacted to the news with shock.\n2 memberikan respons fisik atau emosional. He reacted to the criticism calmly","penjelasan":""},{"id":271,"kata":"Rule out","arti":"menyingkirkan kemungkinan.\n1 menyatakan sesuatu tidak mungkin. The police ruled out foul play.\n2 menghapus dari pertimbangan. We can't rule out a second wave of infection","penjelasan":""},{"id":272,"kata":"Ramp up","arti":"meningkatkan (produksi, usaha).\n1 menambah kapasitas. The factory ramped up production to meet demand.\n2 memperbesar usaha. They ramped up their campaign before the election","penjelasan":""},{"id":273,"kata":"Result in","arti":"mengakibatkan.\n1 menyebabkan hasil tertentu. The fire resulted in significant damage.\n2 berujung pada. Delays resulted in customer complaints","penjelasan":""},{"id":274,"kata":"Run into","arti":"bertemu tidak sengaja, menghadapi.\n1 bertemu tanpa direncanakan. I ran into an old friend at the mall.\n2 mengalami kesulitan. The project ran into financial trouble","penjelasan":""},{"id":275,"kata":"Run over","arti":"menabrak, melampaui.\n1 menabrak dengan kendaraan. He was run over by a car.\n2 melewati batas waktu. The meeting ran over by 30 minutes","penjelasan":""},{"id":276,"kata":"Rip off","arti":"menipu, mematok harga terlalu tinggi.\n1 memeras secara tidak adil. Tourists often get ripped off by local vendors.\n2 menjual dengan harga tidak wajar. That phone is a total rip-off","penjelasan":""},{"id":277,"kata":"Round up","arti":"mengumpulkan, menangkap.\n1 mengumpulkan orang/hal. The police rounded up the suspects.\n2 mengorganisir dengan cepat. Let's round up a team for the task","penjelasan":""},{"id":278,"kata":"Roll out","arti":"meluncurkan (produk atau kebijakan).\n1 memperkenalkan resmi. The company rolled out a new app.\n2 memulai pelaksanaan. The vaccine was rolled out nationwide","penjelasan":""},{"id":279,"kata":"Root out","arti":"membasmi, mencari sampai tuntas.\n1 menyingkirkan hal buruk. They're trying to root out corruption.\n2 mencari hingga ditemukan. The audit rooted out several issues","penjelasan":""},{"id":280,"kata":"Read into","arti":"menafsirkan secara berlebihan.\n1 terlalu menafsirkan. Don't read too much into his comments.\n2 mencari makna tersembunyi. People read into the silence as a sign of guilt","penjelasan":""},{"id":282,"kata":"Set up","arti":"mendirikan, menyiapkan.\n1 membangun atau memulai. The group set up a new charity foundation.\n2 menjebak. He claimed he was set up by his enemies","penjelasan":""},{"id":283,"kata":"Stand out","arti":"menonjol, mencolok.\n1 menarik perhatian. Her performance really stood out from the rest.\n2 terlihat berbeda. The building stands out in the skyline","penjelasan":""},{"id":284,"kata":"Sort out","arti":"menyelesaikan, mengatur.\n1 menyelesaikan masalah. The manager sorted out the scheduling conflict.\n2 mengatur secara sistematis. I need to sort out my emails","penjelasan":""},{"id":285,"kata":"Show up","arti":"datang, muncul.\n1 hadir. She showed up late to the meeting.\n2 muncul secara tiba-tiba. Problems started to show up after the upgrade","penjelasan":""},{"id":286,"kata":"Shut down","arti":"menutup, mematikan.\n1 menutup operasional. The factory shut down due to lack of funds.\n2 mematikan alat/mesin. Please shut down your computer before leaving","penjelasan":""},{"id":287,"kata":"Sign up","arti":"mendaftar.\n1 mendaftarkan diri. Hundreds of people signed up for the event.\n2 ikut serta. I signed up for the online course","penjelasan":""},{"id":288,"kata":"Step down","arti":"mundur dari jabatan.\n1 berhenti secara sukarela. The CEO stepped down amid controversy.\n2 menyerahkan jabatan. She stepped down as chairperson","penjelasan":""},{"id":289,"kata":"Step up","arti":"meningkatkan.\n1 memperbesar upaya. The government stepped up security measures.\n2 maju untuk mengambil tanggung jawab. He stepped up to lead the team","penjelasan":""},{"id":290,"kata":"Speak up","arti":"berbicara lebih keras atau jujur.\n1 bicara lebih jelas/keras. Please speak up, we can't hear you.\n2 mengemukakan pendapat. He spoke up for his colleagues","penjelasan":""},{"id":291,"kata":"Slow down","arti":"memperlambat.\n1 mengurangi kecepatan. The car slowed down near the school zone.\n2 mengurangi laju aktivitas. Production slowed down during the holiday","penjelasan":""},{"id":292,"kata":"Stand up for","arti":"membela.\n1 membela seseorang atau sesuatu. She stood up for her beliefs.\n2 menunjukkan keberanian. He stood up for his friend during the argument","penjelasan":""},{"id":293,"kata":"Settle down","arti":"menenangkan diri, menetap.\n1 hidup tenang/stabil. They settled down after years of moving around.\n2 menenangkan diri. Please settle down, the event is starting","penjelasan":""},{"id":294,"kata":"Send out","arti":"mengirim.\n1 mendistribusikan. The invitations were sent out yesterday.\n2 menyebarkan. The company sent out a press release","penjelasan":""},{"id":295,"kata":"See through","arti":"melihat kebenaran, menyelesaikan.\n1 menyadari maksud tersembunyi. She saw through his lies.\n2 menyelesaikan sampai akhir. I'll see this project through","penjelasan":""},{"id":297,"kata":"Take off","arti":"lepas landas, menjadi sukses, melepas.\n1 pesawat lepas landas. The plane took off on time.\n2 bisnis atau tren menjadi populer. Sales took off after the product launch.\n3 melepas pakaian. He took off his jacket","penjelasan":""},{"id":298,"kata":"Take over","arti":"mengambil alih.\n1 menguasai perusahaan atau tugas. A larger firm took over the company.\n2 menggantikan posisi. She will take over as manager next month","penjelasan":""},{"id":299,"kata":"Take up","arti":"memulai hobi, mengisi waktu/ruang.\n1 mulai melakukan sesuatu. He took up painting during the pandemic.\n2 memakan ruang atau waktu. The sofa takes up too much space","penjelasan":""},{"id":300,"kata":"Turn down","arti":"menolak.\n1 menolak tawaran atau undangan. She turned down the job offer.\n2 mengecilkan volume. Please turn down the music","penjelasan":""},{"id":301,"kata":"Turn up","arti":"muncul, menaikkan.\n1 hadir secara tak terduga. He turned up at the party uninvited.\n2 menaikkan volume atau intensitas. Can you turn up the heater?","penjelasan":""},{"id":302,"kata":"Turn out","arti":"ternyata, menghasilkan, datang.\n1 terbukti. It turned out better than expected.\n2 menghasilkan. The factory turns out 1,000 units a day.\n3 menghadiri. Thousands turned out for the protest","penjelasan":""},{"id":303,"kata":"Talk over","arti":"mendiskusikan.\n1 membahas suatu topik. They talked over the proposal before signing.\n2 mendiskusikan untuk mengambil keputusan. We need to talk it over before deciding","penjelasan":""},{"id":304,"kata":"Think over","arti":"mempertimbangkan.\n1 memikirkan secara matang. Think over the offer before you respond.\n2 merenungkan pilihan. She's thinking it over this weekend","penjelasan":""},{"id":305,"kata":"Throw away","arti":"membuang.\n1 membuang barang tak berguna. Don't throw away those documents yet.\n2 menyia-nyiakan kesempatan. He threw away his chances with one bad decision","penjelasan":""},{"id":306,"kata":"Turn in","arti":"menyerahkan, tidur.\n1 menyerahkan tugas atau dokumen. He turned in his resignation.\n2 pergi tidur. I'm tired—I'll turn in early tonight","penjelasan":""},{"id":307,"kata":"Take in","arti":"memahami, menampung, menipu.\n1 mengerti informasi. There was too much to take in during the lecture.\n2 memberi tempat tinggal. They took in a stray dog.\n3 menipu seseorang. He was taken in by the scam","penjelasan":""},{"id":308,"kata":"Try out","arti":"mencoba.\n1 menguji coba sesuatu. She tried out a new recipe.\n2 mengikuti seleksi. He tried out for the basketball team","penjelasan":""},{"id":309,"kata":"Talk into","arti":"membujuk.\n1 meyakinkan seseorang untuk melakukan sesuatu. She talked me into joining the workshop.\n2 mendorong dengan argumen. They talked him into running for office","penjelasan":""},{"id":310,"kata":"Talk out of","arti":"mencegah, membujuk agar tidak.\n1 membujuk agar tidak melakukan sesuatu. I tried to talk her out of quitting.\n2 menasihati. They talked him out of investing all his money","penjelasan":""},{"id":311,"kata":"Think through","arti":"mempertimbangkan secara menyeluruh.\n1 memikirkan dari semua sisi. You should think through the consequences first.\n2 menganalisis secara detail. They need time to think the plan through","penjelasan":""},{"id":312,"kata":"Unaccounted for","arti":"tidak dapat dijelaskan, tidak dapat ditemukan.\n1 tidak dapat dijelaskan. This puzzle is unaccounted for.\n2 tidak dapat ditemukan. 5 persons were unaccounted after the fire","penjelasan":""},{"id":313,"kata":"Use up","arti":"menghabiskan.\n1 memakai hingga habis. We've used up all the paper in the printer.\n2 menghabiskan sumber daya. The project used up most of the budget","penjelasan":""},{"id":314,"kata":"Urge on","arti":"mendorong, menyemangati.\n1 memberi dorongan semangat. The crowd urged the runners on.\n2 menyemangati untuk bertindak. He was urged on by his teammates","penjelasan":""},{"id":315,"kata":"Unfold into","arti":"berkembang menjadi.\n1 terbuka menjadi sesuatu. The situation unfolded into a national crisis.\n2 berubah seiring waktu. The story unfolded into a complex narrative","penjelasan":""},{"id":316,"kata":"Use for","arti":"digunakan untuk.\n1 fungsi spesifik. This software is used for data analysis.\n2 tujuan penggunaan. What is this device used for?","penjelasan":""},{"id":317,"kata":"Update on","arti":"memberikan kabar terbaru tentang.\n1 memberikan informasi terkini. The news anchor updated viewers on the flood.\n2 memberi perkembangan. Can you update me on the project status?","penjelasan":""},{"id":318,"kata":"Urge upon","arti":"menekankan (jarang, formal).\n1 mendesakkan pemikiran. The professor urged the importance of critical thinking upon his students.\n2 menekankan ide. He urged his view upon the committee","penjelasan":""},{"id":319,"kata":"Use against","arti":"menggunakan untuk melawan.\n1 memakai sesuatu sebagai senjata argumen. The email was used against him in court.\n2 melawan dengan bukti. They used her statement against her","penjelasan":""},{"id":320,"kata":"Unleash on","arti":"meluncurkan serangan/kritik.\n1 menyerang. The journalist unleashed harsh criticism on the mayor.\n2 melepaskan kekuatan. The storm unleashed its fury on the coast","penjelasan":""},{"id":321,"kata":"Undermine by","arti":"dilemahkan oleh.\n1 merusak secara perlahan. The reforms were undermined by internal opposition.\n2 dikurangi efektivitasnya. Public trust was undermined by scandal","penjelasan":""},{"id":322,"kata":"Unite against","arti":"bersatu melawan.\n1 menyatukan kekuatan. The nations united against terrorism.\n2 berkoalisi menghadapi ancaman. Communities united against rising crime","penjelasan":""},{"id":323,"kata":"Unwind after","arti":"bersantai setelah.\n1 melepaskan ketegangan. He likes to unwind after work by listening to music.\n2 menenangkan diri. Let's unwind after that stressful meeting","penjelasan":""},{"id":325,"kata":"Usher in","arti":"membuka era baru.\n1 mengawali masa atau sistem baru. The new leader ushered in a period of reform.\n2 memulai perubahan besar. This innovation ushered in a new age of technology","penjelasan":""},{"id":326,"kata":"Unplug from","arti":"melepaskan diri dari.\n1 secara literal (colokan). Please unplug the charger from the outlet.\n2 secara metaforis (dari media, rutinitas). She unplugged from social media for a week","penjelasan":""},{"id":327,"kata":"Vacuum out","arti":"mengosongkan","penjelasan":"The workers vacuum out the building."},{"id":328,"kata":"Value on","arti":"menetapkan harga","penjelasan":"The trader placed a high value on"},{"id":329,"kata":"Vote for","arti":"memilih (mendukung).\n1 memberikan suara kepada. Most citizens voted for the incumbent president.\n2 mendukung secara resmi. The council voted for the new policy","penjelasan":""},{"id":330,"kata":"Vote against","arti":"memilih menolak.\n1 memberikan suara menolak. Three members voted against the proposal.\n2 tidak mendukung keputusan. The board voted against the merger","penjelasan":""},{"id":331,"kata":"Vouch for","arti":"menjamin, merekomendasikan.\n1 memberikan jaminan kualitas/karakter. I can vouch for his honesty.\n2 menjadi saksi atau penjamin. She vouched for his ability in court","penjelasan":""},{"id":332,"kata":"Venture into","arti":"memberanikan diri memasuki (bidang/area).\n1 memasuki hal baru. The company ventured into the Asian market.\n2 mencoba sesuatu yang berisiko. He ventured into politics last year","penjelasan":""},{"id":333,"kata":"Vanish into","arti":"menghilang ke dalam.\n1 lenyap tanpa jejak. The plane vanished into thin air.\n2 menghilang masuk sesuatu. He vanished into the crowd","penjelasan":""},{"id":334,"kata":"Voice out","arti":"menyuarakan pendapat.\n1 menyatakan secara terbuka. Citizens voiced out their concerns at the meeting.\n2 mengungkapkan unek-unek. She voiced out her disappointment","penjelasan":""},{"id":335,"kata":"Volunteer for","arti":"menjadi sukarelawan untuk.\n1 menawarkan diri. She volunteered for the cleanup project.\n2 terlibat secara sukarela. They volunteered for front-line medical duty","penjelasan":""},{"id":336,"kata":"Vow to","arti":"bersumpah untuk.\n1 berjanji keras. The candidate vowed to fight corruption.\n2 berkomitmen secara publik. He vowed to never give up","penjelasan":""},{"id":337,"kata":"Vary with","arti":"berbeda tergantung.\n1 bergantung pada situasi. The result may vary with conditions.\n2 tidak tetap. The price varies with demand","penjelasan":""},{"id":338,"kata":"View as","arti":"memandang sebagai.\n1 menganggap sesuatu dalam cara tertentu. He was viewed as a strong leader.\n2 dilihat dalam konteks tertentu. The changes are viewed as necessary","penjelasan":""},{"id":339,"kata":"Vibrate with","arti":"dipenuhi (emosi, aktivitas).\n1 penuh semangat atau suara. The hall vibrated with applause.\n2 menunjukkan intensitas. His voice vibrated with anger","penjelasan":""},{"id":340,"kata":"Vacuum up","arti":"menyedot, mengambil semuanya.\n1 membersihkan total. The robot vacuumed up all the crumbs.\n2 mengambil semua peluang. Big companies vacuum up small startups","penjelasan":""},{"id":341,"kata":"Veer off","arti":"menyimpang, berubah arah.\n1 keluar dari jalur. The car veered off the road.\n2 berpindah topik atau strategi. The discussion veered off course","penjelasan":""},{"id":342,"kata":"Vote down","arti":"menolak melalui suara.\n1 menggagalkan usulan. The motion was voted down by the majority.\n2 tidak disetujui lewat pemungutan suara. The amendment was voted down","penjelasan":""},{"id":343,"kata":"Vanish from","arti":"lenyap dari.\n1 menghilang dari lokasi. The documents vanished from the office.\n2 tidak lagi ada di tempat tertentu. She vanished from the public eye","penjelasan":""},{"id":344,"kata":"Wad up","arti":"menggulung, menggumpalkan","penjelasan":"Susan wadded up the paper and threw it away."},{"id":345,"kata":"Wake up","arti":"bangun, menyadarkan.\n1 bangun tidur. He wakes up at 6 a.m. every day.\n2 menyadari realitas. The public needs to wake up to the climate crisis","penjelasan":""},{"id":346,"kata":"Wear out","arti":"menjadi usang/lelah.\n1 menjadi rusak karena pemakaian. These shoes are completely worn out.\n2 membuat sangat lelah. All the stress wore him out","penjelasan":""},{"id":347,"kata":"Work out","arti":"menyelesaikan, berhasil, berolahraga.\n1 memecahkan masalah. They worked out a compromise.\n2 berhasil. The plan worked out well.\n3 melakukan latihan fisik. She works out at the gym daily","penjelasan":""},{"id":348,"kata":"Write down","arti":"mencatat.\n1 menulis untuk diingat. Write down your password somewhere safe.\n2 mencatat nilai atau harga. The assets were written down after the crisis","penjelasan":""},{"id":349,"kata":"Wipe out","arti":"memusnahkan, menghilangkan.\n1 menghancurkan sepenuhnya. The disease nearly wiped out the population.\n2 menghapus secara total. The budget cut wiped out several programs","penjelasan":""},{"id":350,"kata":"Wind up","arti":"mengakhiri, berakhir.\n1 menutup atau menyelesaikan. Let's wind up the meeting.\n2 berakhir dalam kondisi tertentu. He wound up broke after the divorce","penjelasan":""},{"id":351,"kata":"Work on","arti":"mengerjakan, memperbaiki.\n1 sedang mengerjakan sesuatu. They're working on the final report.\n2 berusaha memperbaiki. She's working on her communication skills","penjelasan":""},{"id":352,"kata":"Wait for","arti":"menunggu.\n1 menantikan kedatangan atau hasil. We're waiting for the results.\n2 menunggu giliran atau waktu yang tepat. She waited for the right moment","penjelasan":""},{"id":353,"kata":"Walk through","arti":"menjelaskan secara langkah demi langkah.\n1 membimbing secara menyeluruh. The trainer walked us through the process.\n2 melakukan simulasi. Let's walk through the presentation together","penjelasan":""},{"id":354,"kata":"Wake up to","arti":"menyadari secara tiba-tiba.\n1 mulai menyadari kebenaran. People are waking up to the reality of inflation.\n2 terbuka pikirannya terhadap fakta. He finally woke up to his responsibilities","penjelasan":""},{"id":355,"kata":"Work against","arti":"merugikan, menjadi penghambat.\n1 berlawanan dengan kepentingan. Lack of experience worked against her.\n2 menjadi hambatan. His past mistakes worked against his chances","penjelasan":""},{"id":357,"kata":"Yank out","arti":"menarik secara paksa.\n1 mencabut dengan kasar. He yanked out the USB without ejecting it properly.\n2 menarik secara tiba-tiba. The dentist yanked out his tooth quickly","penjelasan":""},{"id":358,"kata":"Yell out","arti":"berteriak (kuat dan jelas).\n1 berteriak lantang. She yelled out for help.\n2 memanggil keras. Someone yelled out his name from the crowd","penjelasan":""},{"id":359,"kata":"Yield to","arti":"menyerah, tunduk.\n1 menyerah pada tekanan atau kekuatan. The government yielded to public pressure.\n2 memberi jalan (secara harfiah atau figuratif). Drivers must yield to pedestrians","penjelasan":""},{"id":361,"kata":"Yawn through","arti":"melewati sesuatu dengan bosan.\n1 mengalami sesuatu yang membosankan. He yawned through the three-hour seminar.\n2 menonton atau mendengar tanpa minat. They yawned through the speech","penjelasan":""},{"id":362,"kata":"Yell at","arti":"memarahi dengan teriakan.\n1 berteriak karena marah. She yelled at her kids for breaking the vase.\n2 memarahi dengan suara tinggi. The coach yelled at the team for slacking off","penjelasan":""},{"id":363,"kata":"Yearn for","arti":"sangat merindukan/menginginkan.\n1 sangat menginginkan sesuatu. She yearned for peace and quiet.\n2 merindukan sesuatu yang tidak dimiliki. He yearns for his childhood days","penjelasan":""},{"id":364,"kata":"Yank on","arti":"menarik terus-menerus.\n1 menarik secara berulang. The child kept yanking on his father's sleeve.\n2 menarik dengan paksa. Stop yanking on the leash, you'll hurt the dog","penjelasan":""},{"id":365,"kata":"Yank back","arti":"menarik kembali secara cepat.\n1 menarik mundur tiba-tiba. She yanked her hand back from the hot stove.\n2 menarik karena terkejut atau takut. He yanked back when the firecracker exploded","penjelasan":""},{"id":366,"kata":"Yell back","arti":"membalas teriakan.\n1 berteriak sebagai respons. He yelled back at the protestors.\n2 adu teriak. The kids yelled back and forth across the playground","penjelasan":""},{"id":367,"kata":"Zeal for","arti":"semangat dalam, bergembira terhadap","penjelasan":"He showed zeal for the cause"},{"id":368,"kata":"Zone out","arti":"kehilangan fokus, melamun.\n1 tidak memperhatikan. She zoned out during the long meeting.\n2 masuk ke dalam lamunan. He often zones out when he's tired","penjelasan":""},{"id":369,"kata":"Zip up","arti":"menutup ritsleting.\n1 menutup dengan resleting. Don't forget to zip up your jacket.\n2 menyelesaikan dengan cepat (kiasan). He zipped up the report in no time","penjelasan":""},{"id":370,"kata":"Zoom out","arti":"memperkecil, melihat gambaran umum.\n1 memperkecil tampilan. Zoom out to see the full map.\n2 melihat dari perspektif lebih luas. Let's zoom out and consider the broader issue","penjelasan":""},{"id":371,"kata":"Zap through","arti":"melintasi dengan cepat (informal).\n1 melewati saluran TV dengan cepat. He zapped through the channels with the remote.\n2 menyelesaikan sesuatu dengan cepat. She zapped through her homework","penjelasan":""},{"id":372,"kata":"Zip through","arti":"menyelesaikan dengan cepat.\n1 menyelesaikan pekerjaan dengan sangat cepat. They zipped through the review session.\n2 bergerak cepat melalui sesuatu. The car zipped through traffic","penjelasan":""}];
+
+// =====================
+// STATE
+// =====================
+let currentSearch = '';
+let currentAlpha = 'ALL';
+let currentView = 'list';
+let wotdEntry = null;
+let expandedId = null;
+
+// =====================
+// INIT
+// =====================
+function init() {
+  buildAlphaFilter();
+  setRandomWotd();
+  renderEntries();
+  document.getElementById('total-count').textContent = DICT_DATA.length;
+}
+
+// =====================
+// ALPHABET FILTER
+// =====================
+function buildAlphaFilter() {
+  const letters = [...new Set(DICT_DATA.map(e => e.kata[0].toUpperCase()))].sort();
+  const container = document.getElementById('alpha-filter');
+  letters.forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'alpha-btn';
+    btn.textContent = l;
+    btn.onclick = () => filterAlpha(l);
+    container.appendChild(btn);
+  });
+}
+
+function filterAlpha(letter) {
+  currentAlpha = letter;
+  currentSearch = '';
+  document.getElementById('search-input').value = '';
+  toggleClearBtn(false);
+  document.querySelectorAll('.alpha-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === letter || (letter === 'ALL' && b.textContent === 'ALL'));
+  });
+  renderEntries();
+}
+
+// =====================
+// SEARCH
+// =====================
+document.getElementById('search-input').addEventListener('input', function() {
+  currentSearch = this.value.trim().toLowerCase();
+  currentAlpha = 'ALL';
+  document.querySelectorAll('.alpha-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === 'ALL');
+  });
+  toggleClearBtn(currentSearch.length > 0);
+  renderEntries();
+});
+
+function toggleClearBtn(show) {
+  document.getElementById('search-clear').style.display = show ? 'flex' : 'none';
+  document.getElementById('search-icon-wrap').style.display = show ? 'none' : 'flex';
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  currentSearch = '';
+  toggleClearBtn(false);
+  filterAlpha('ALL');
+}
+
+// =====================
+// VIEW TOGGLE
+// =====================
+function setView(v) {
+  currentView = v;
+  const container = document.getElementById('entries-container');
+  document.getElementById('view-list').classList.toggle('active', v === 'list');
+  document.getElementById('view-grid').classList.toggle('active', v === 'grid');
+  if (v === 'grid') container.classList.add('grid-mode');
+  else container.classList.remove('grid-mode');
+}
+
+// =====================
+// WORD OF THE DAY
+// =====================
+function setRandomWotd() {
+  wotdEntry = DICT_DATA[Math.floor(Math.random() * DICT_DATA.length)];
+  const shortArti = getShortArti(wotdEntry.arti);
+  document.getElementById('wotd-keyword').textContent = wotdEntry.kata;
+  document.getElementById('wotd-arti').textContent = shortArti;
+}
+
+function goToWord(entry) {
+  currentSearch = '';
+  currentAlpha = 'ALL';
+  document.getElementById('search-input').value = '';
+  toggleClearBtn(false);
+  document.querySelectorAll('.alpha-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === 'ALL');
+  });
+  renderEntries();
+  setTimeout(() => {
+    const el = document.getElementById('card-' + entry.id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      expandCard(entry.id);
+      el.classList.add('flash-highlight');
+      setTimeout(() => el.classList.remove('flash-highlight'), 800);
+    }
+  }, 100);
+}
+
+// =====================
+// RENDER
+// =====================
+function getShortArti(arti) {
+  const lines = arti.split('\n');
+  const first = lines[0].replace(/\.$/, '');
+  return first.length > 60 ? first.substring(0, 57) + '…' : first;
+}
+
+function highlight(text, query) {
+  if (!query) return escHtml(text);
+  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return escHtml(text).replace(re, '<mark>$1</mark>');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDetail(arti) {
+  return arti.split('\n').map(line => {
+    line = line.trim();
+    if (!line) return '';
+    // Check if it's a numbered line with example
+    const m = line.match(/^(\d+)\s+(.*)/);
+    if (m) {
+      const rest = m[2];
+      const dotIdx = rest.indexOf('.');
+      if (dotIdx > -1) {
+        const meaning = rest.substring(0, dotIdx + 1);
+        const example = rest.substring(dotIdx + 1).trim();
+        return `<div class="mb-2">
+          <span class="font-semibold text-sm" style="color:var(--ink)">${escHtml(m[1])}. ${escHtml(meaning)}</span>
+          ${example ? `<br><span class="example-line pl-3">⟶ ${escHtml(example)}</span>` : ''}
+        </div>`;
+      }
+      return `<div class="mb-1 text-sm font-medium" style="color:var(--ink)">${escHtml(m[1])}. ${escHtml(rest)}</div>`;
+    }
+    // First line with meaning summary
+    return `<div class="mb-2 font-semibold text-sm" style="color:var(--accent)">${escHtml(line)}</div>`;
+  }).join('');
+}
+
+function renderEntries() {
+  const container = document.getElementById('entries-container');
+  const empty = document.getElementById('empty-state');
+
+  let filtered = DICT_DATA;
+
+  if (currentSearch) {
+    filtered = DICT_DATA.filter(e =>
+      e.kata.toLowerCase().includes(currentSearch) ||
+      e.arti.toLowerCase().includes(currentSearch) ||
+      e.penjelasan.toLowerCase().includes(currentSearch)
+    );
+  } else if (currentAlpha !== 'ALL') {
+    filtered = DICT_DATA.filter(e => e.kata[0].toUpperCase() === currentAlpha);
+  }
+
+  // Update stats
+  document.getElementById('result-stats').textContent =
+    filtered.length === DICT_DATA.length
+      ? `${DICT_DATA.length} kata`
+      : `${filtered.length} / ${DICT_DATA.length} kata`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  // Group by letter when no search
+  let html = '';
+  if (!currentSearch) {
+    const groups = {};
+    filtered.forEach(e => {
+      const l = e.kata[0].toUpperCase();
+      if (!groups[l]) groups[l] = [];
+      groups[l].push(e);
+    });
+    Object.keys(groups).sort().forEach(letter => {
+      html += `<div class="letter-divider">
+        <span class="letter-divider-char">${letter}</span>
+        <div class="letter-divider-line"></div>
+        <span class="letter-count">${groups[letter].length} kata</span>
+      </div>`;
+      groups[letter].forEach(e => {
+        html += renderCard(e, '');
+      });
+    });
+  } else {
+    filtered.forEach(e => {
+      html += renderCard(e, currentSearch);
+    });
+  }
+
+  container.innerHTML = html;
+  // Cancel any playing TTS when re-rendering
+  if (ttsSupported && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    currentSpeakBtnId = null;
+  }
+}
+
+function renderCard(entry, query) {
+  const isExpanded = expandedId === entry.id;
+  const shortArti = getShortArti(entry.arti);
+  const kwHtml = highlight(entry.kata, query);
+  const artiHtml = highlight(shortArti, query);
+
+  // Build example sentences for TTS (the full kata + examples)
+  const examples = extractExamples(entry.arti);
+  const examplesHtml = examples.map((ex, i) => `
+    <div class="flex items-start gap-2 mb-2">
+      <span class="example-line flex-1">⟶ ${escHtml(ex)}</span>
+      <button class="speak-btn" id="spk-ex-${entry.id}-${i}"
+        onclick="event.stopPropagation();speakText('${escAttr(ex)}', 'spk-ex-${entry.id}-${i}')"
+        title="Dengarkan contoh kalimat">
+        <svg class="speaker-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span class="wave-bars"><span></span><span></span><span></span><span></span><span></span></span>
+      </button>
+    </div>`).join('');
+
+  return `<div class="entry-card px-4 py-3 ${isExpanded ? 'expanded' : ''}" id="card-${entry.id}" onclick="toggleCard(${entry.id})">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-0.5">
+          <div class="entry-keyword">${kwHtml}</div>
+          <button class="speak-btn" id="spk-${entry.id}"
+            onclick="event.stopPropagation();speakText('${escAttr(entry.kata)}', 'spk-${entry.id}')"
+            title="Dengarkan pengucapan">
+            <svg class="speaker-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            <span class="wave-bars"><span></span><span></span><span></span><span></span><span></span></span>
+          </button>
+        </div>
+        <div class="entry-arti-short">${artiHtml}</div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0 mt-1">
+        <span class="tag-pill tag-phrasal">PV</span>
+        <span class="text-lg transition-transform duration-200 select-none" style="color:var(--muted);transform:${isExpanded?'rotate(180deg)':'rotate(0)'}">›</span>
+      </div>
+    </div>
+    <div class="detail-panel">
+      <div class="detail-meaning">${formatDetailWithExamples(entry.arti, entry.id)}</div>
+      ${entry.penjelasan ? `<div class="mt-3 pt-3 border-t border-dashed" style="border-color:rgba(0,0,0,0.08)">
+        <div class="mono-font text-xs mb-1" style="color:var(--gold);letter-spacing:0.06em;text-transform:uppercase">Catatan</div>
+        <div class="text-sm" style="color:var(--muted);line-height:1.7">${escHtml(entry.penjelasan)}</div>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+function escAttr(str) {
+  return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
+}
+
+function extractExamples(arti) {
+  const lines = arti.split('\n');
+  const examples = [];
+  lines.forEach(line => {
+    const m = line.match(/^\d+\s+.*?\.\s+(.+)/);
+    if (m) examples.push(m[1].trim());
+  });
+  return examples;
+}
+
+function formatDetailWithExamples(arti, entryId) {
+  let exIdx = 0;
+  return arti.split('\n').map(line => {
+    line = line.trim();
+    if (!line) return '';
+    const m = line.match(/^(\d+)\s+(.*)/);
+    if (m) {
+      const rest = m[2];
+      const dotIdx = rest.indexOf('.');
+      if (dotIdx > -1) {
+        const meaning = rest.substring(0, dotIdx + 1);
+        const example = rest.substring(dotIdx + 1).trim();
+        const speakId = `spk-ex-${entryId}-${exIdx}`;
+        const speakBtn = example ? `<button class="speak-btn ml-1" id="${speakId}"
+            onclick="event.stopPropagation();speakText('${escAttr(example)}','${speakId}')"
+            title="Dengarkan contoh kalimat" style="width:24px;height:24px">
+            <svg class="speaker-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            <span class="wave-bars"><span></span><span></span><span></span><span></span><span></span></span>
+          </button>` : '';
+        exIdx++;
+        return `<div class="mb-2">
+          <span class="font-semibold text-sm" style="color:var(--ink)">${escHtml(m[1])}. ${escHtml(meaning)}</span>
+          ${example ? `<div class="flex items-center gap-1 pl-2 mt-0.5">
+            <span class="example-line flex-1">${escHtml(example)}</span>
+            ${speakBtn}
+          </div>` : ''}
+        </div>`;
+      }
+      return `<div class="mb-1 text-sm font-medium" style="color:var(--ink)">${escHtml(m[1])}. ${escHtml(rest)}</div>`;
+    }
+    // First line = meaning summary with speak button
+    const speakId = `spk-sum-${entryId}`;
+    return `<div class="flex items-center gap-2 mb-2">
+      <span class="font-semibold text-sm flex-1" style="color:var(--accent)">${escHtml(line)}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id) {
+  if (expandedId === id) {
+    expandedId = null;
+  } else {
+    expandedId = id;
+  }
+  // Re-render only affected cards for performance
+  const el = document.getElementById('card-' + id);
+  if (el) {
+    el.classList.toggle('expanded', expandedId === id);
+    const detail = el.querySelector('.detail-panel');
+    if (detail) detail.style.display = expandedId === id ? 'block' : 'none';
+    const arrow = el.querySelector('span:last-child');
+    if (arrow) arrow.style.transform = expandedId === id ? 'rotate(180deg)' : 'rotate(0deg)';
+  }
+}
+
+function expandCard(id) {
+  expandedId = id;
+  const el = document.getElementById('card-' + id);
+  if (el) {
+    el.classList.add('expanded');
+    const detail = el.querySelector('.detail-panel');
+    if (detail) detail.style.display = 'block';
+    const arrow = el.querySelector('.flex.items-center.gap-2 span:last-child');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+  }
+}
+
+// =====================
+// TTS (TEXT TO SPEECH)
+// =====================
+let ttsSupported = false;
+let ttsVoices = [];
+let ttsLang = 'en-US';
+let ttsRate = 0.85;
+let ttsPitch = 1.0;
+let currentSpeakBtnId = null;
+let ttsUtterance = null;
+
+function initTTS() {
+  if (!('speechSynthesis' in window)) {
+    document.getElementById('tts-bar').style.opacity = '0.5';
+    document.getElementById('tts-unsupported').style.display = 'inline';
+    document.querySelectorAll('.accent-chip, #tts-rate, #tts-pitch').forEach(el => el.disabled = true);
+    return;
+  }
+  ttsSupported = true;
+  // Load voices (async on some browsers)
+  const loadVoices = () => {
+    ttsVoices = window.speechSynthesis.getVoices();
+  };
+  loadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
+
+function getBestVoice(lang) {
+  if (!ttsVoices.length) ttsVoices = window.speechSynthesis.getVoices();
+  // Priority: exact lang match with 'Google' or 'Microsoft', then any lang match
+  const pref = ttsVoices.filter(v => v.lang === lang || v.lang.startsWith(lang.split('-')[0]));
+  const premium = pref.find(v => /google|microsoft|apple/i.test(v.name) && v.lang === lang);
+  const good    = pref.find(v => v.lang === lang);
+  const fallback = pref[0];
+  return premium || good || fallback || null;
+}
+
+function speakText(text, btnId) {
+  if (!ttsSupported) {
+    showToast('Browser Anda tidak mendukung Text-to-Speech');
+    return;
+  }
+  // Stop if already speaking same button
+  if (currentSpeakBtnId === btnId && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    setSpeakBtnState(btnId, false);
+    currentSpeakBtnId = null;
+    return;
+  }
+  // Cancel any previous speech
+  window.speechSynthesis.cancel();
+  if (currentSpeakBtnId) setSpeakBtnState(currentSpeakBtnId, false);
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = ttsLang;
+  utterance.rate = ttsRate;
+  utterance.pitch = ttsPitch;
+  const voice = getBestVoice(ttsLang);
+  if (voice) utterance.voice = voice;
+
+  utterance.onstart = () => {
+    setSpeakBtnState(btnId, true);
+    currentSpeakBtnId = btnId;
+  };
+  utterance.onend = utterance.onerror = () => {
+    setSpeakBtnState(btnId, false);
+    currentSpeakBtnId = null;
+  };
+  ttsUtterance = utterance;
+  window.speechSynthesis.speak(utterance);
+}
+
+function setSpeakBtnState(btnId, active) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.classList.toggle('speaking', active);
+}
+
+function setAccent(lang, btn) {
+  ttsLang = lang;
+  document.querySelectorAll('.accent-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Update range gradient
+  updateRangeGradients();
+}
+
+function updateRate(val) {
+  ttsRate = parseFloat(val);
+  document.getElementById('tts-rate-val').textContent = parseFloat(val).toFixed(2) + '×';
+  updateRangeGradients();
+}
+
+function updatePitch(val) {
+  ttsPitch = parseFloat(val);
+  document.getElementById('tts-pitch-val').textContent = parseFloat(val).toFixed(1);
+  updateRangeGradients();
+}
+
+function updateRangeGradients() {
+  const rateEl = document.getElementById('tts-rate');
+  const pitchEl = document.getElementById('tts-pitch');
+  if (rateEl) {
+    const pct = ((rateEl.value - rateEl.min) / (rateEl.max - rateEl.min)) * 100;
+    rateEl.style.background = `linear-gradient(to right, var(--accent2) 0%, var(--accent2) ${pct}%, #ddd ${pct}%, #ddd 100%)`;
+  }
+  if (pitchEl) {
+    const pct = ((pitchEl.value - pitchEl.min) / (pitchEl.max - pitchEl.min)) * 100;
+    pitchEl.style.background = `linear-gradient(to right, var(--accent2) 0%, var(--accent2) ${pct}%, #ddd ${pct}%, #ddd 100%)`;
+  }
+}
+
+// Toast notification
+function showToast(msg) {
+  let t = document.getElementById('toast-msg');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast-msg';
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:10px 20px;font-size:13px;z-index:999;font-family:DM Sans,sans-serif;border-left:3px solid var(--accent);box-shadow:3px 3px 0 var(--accent);white-space:nowrap;transition:opacity 0.3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// Also speak from WOTD banner
+function speakWotd() {
+  if (wotdEntry) speakText(wotdEntry.kata, 'spk-wotd');
+}
+
+
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTop');
+  btn.classList.toggle('visible', window.scrollY > 400);
+});
+
+window.addEventListener('beforeunload', () => {
+  if (ttsSupported) window.speechSynthesis.cancel();
+});
+
+// =====================
+// START
+// =====================
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  initTTS();
+  updateRangeGradients();
+});
+</script>
+</body>
+</html>
